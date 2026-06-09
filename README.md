@@ -1,6 +1,6 @@
-# The Keystone Lab — EY.ai
+# The Keystone Lab — a working concept for EY
 
-A cinematic, single-page pitch site for **The Keystone Lab**: EY's proposed frontier systems lab that turns frontier AI into governed, certifiable enterprise infrastructure. Working concept for leadership review.
+A cinematic, single-page pitch site for **The Keystone Lab**: EY's proposed frontier systems lab that turns frontier AI into governed, certifiable enterprise infrastructure. Independent working concept for leadership review — not an authorized EY publication (the disclaimer is visible in the hero and footer).
 
 Static site — no build step, no framework, no dependencies to install. Open it and it runs.
 
@@ -18,7 +18,17 @@ Or deploy as-is to GitHub Pages / Netlify / any static host (`index.html` is the
 
 ## What's on the page
 
-A 20-section scrollytelling narrative (Why now → What changes → the Lab → Keystone AI OS → the Truth Layer → the Gate → the platform → partners → banking proof → … → Why John → staging → no-lose → the ask), carried by:
+A decision-first scrollytelling narrative. The hero carries the ask (a 90-day scale-or-stop decision), and the page is organized as seven executive parts, each with clearly labeled supporting-detail sections beneath it:
+
+1. **Why now** (`#whynow`, `#thesis`) — own the governed systems layer or run downstream of someone else's
+2. **What Keystone is** (`#keystone`) — the four-thing executive layer: *the Lab builds it, the OS runs it, the Gate certifies it, the Proving Ground proves it* — with deep dives (`#lab`, `#build`, `#keystoneos`, `#truth`, `#trust`)
+3. **What it proves first** (`#lighthouse`, `#products`) — three banking demonstrators
+4. **Why EY can win** (`#model`, `#partners`, `#adoption`) — trust, independence, domain complexity, EY.ai momentum
+5. **Why John** (`#whyjohn`) — operator fit, not biography
+6. **The 90-day proof** (`#decision`) — six checkable yes/no gates
+7. **The scale path** (`#ask`, `#nolose`, `#flywheel`, `#shape`) — 9 / 18 / 36 months, staged as a no-lose option
+
+A closing **Sources & evidence** section (`#sources`) footnotes every EY-public and peer claim (EY newsroom, Deloitte, KPMG, Accenture); in-text superscripts link to it. All of it carried by:
 
 - **A morphing 3D keystone spine** (`js/keystone3d.js`) — one WebGL keystone, fixed behind all content, that morphs as you scroll: whole at the hero → splits into three voussoir wedges at the platform section → becomes a spinning flywheel hub → locks inside the golden Gate frame → seals front-facing and glowing at the CTA. Falls back silently to a drawn SVG arch if Three.js or WebGL is unavailable.
 - **The interactive Keystone Gate** (`js/gate.js`) — pick an agent, run a six-step certification (Identity → Evaluation → Independence → Red-team → Attestation → Passport), and mint a unique Agent Passport with stamps, an evidence hash, and a certified badge.
