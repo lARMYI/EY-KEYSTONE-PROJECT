@@ -39,15 +39,29 @@ A closing **Sources & evidence** section (`#sources`) footnotes every EY-public 
 ## Structure
 
 ```
-index.html          page shell — all section content lives here
-css/keystone.css    the full design system (tokens, atmosphere, components, chat)
-js/keystone3d.js    WebGL keystone spine (Three.js r128, progressive enhancement)
-js/keystone.js      core: reveals, counters, flywheel, generated grids, health fallback
-js/gate.js          interactive Gate certification + Agent Passport
-js/kos.js           Keystone OS simulation readout
-js/keystone-fx.js   card tilt/glare + cursor halo (fine pointers only)
-js/keystone-ai.js   the briefing agent (chat drawer, agent pipeline, truth layer)
+index.html             page shell — all main pitch content lives here
+roadmap.html           supplement — "Becoming AI-native": definition, maturity ladder, horizons, scorecard
+maturity.html          supplement — the seven transformation pillars, charted across the three horizons
+quarters.html          supplement — the twelve-quarter development plan (Phase 0 → Phase 3)
+css/keystone.css       the full design system (tokens, atmosphere, components, chat)
+js/keystone3d.js       WebGL keystone spine (Three.js r128, progressive enhancement)
+js/keystone.js         core: reveals, counters, flywheel, generated grids, health fallback
+js/gate.js             interactive Gate certification + Agent Passport
+js/kos.js              Keystone OS simulation readout
+js/keystone-fx.js      card tilt/glare + cursor halo (fine pointers only)
+js/keystone-ai.js      the briefing agent (chat drawer, agent pipeline, truth layer)
+js/keystone-roadmap.js the AI-native roadmap "memory" (data) + self-contained renderer/runtime
 ```
+
+## The AI-native roadmap supplement
+
+Three companion pages turn the pitch's "Prove → Scale → Transform" arc into a concrete transformation plan, in the same design language as `index.html` (the main page is left untouched). They are driven entirely by one data structure — `window.KEYSTONE_ROADMAP` in `js/keystone-roadmap.js` — which is both the **new "AI memory"** and the page renderer:
+
+- **`roadmap.html`** — what *AI-native* means (vs AI-assisted), the **L0–L5 maturity ladder** (Manual → Assisted → Augmented → Orchestrated → Governed-autonomous → AI-native), the **three horizons** (today / +12 months / +3 years) and a **success scorecard** across capability, governance, economics and talent.
+- **`maturity.html`** — **seven pillars** (the Lab, Keystone OS, the Gate, the Truth Layer, Workforce, Proving Grounds, Economics), each charted *today / +12 months / +3 years* with the metric that proves the move.
+- **`quarters.html`** — a **12-quarter** development plan across four phases, each quarter carrying a theme, a target maturity level and a yes/no measure.
+
+`keystone-roadmap.js` is deliberately self-contained (its own reveals, nav, progress and animation-health fallback) so the supplements do **not** depend on `keystone.js`. The same facts are mirrored into the briefing agent's memory in `js/keystone-ai.js` (new `ainative` / `roadmap` KB topics, new chartable `FACTS`, and new `CLAIMS` ids — `ey7`, `mk5–mk7`, `ks5–ks7`) so the agent can discuss the roadmap with the same evidence discipline. Everything proposed here is labeled **Keystone-proposed**; EY-public facts stay cited to EY's record.
 
 Design tokens live in `:root` in `css/keystone.css` — navy ground (`#070A10`), metallic gold (`#E9B84A`), Fraunces for display, Hanken Grotesk for UI, JetBrains Mono for labels.
 
