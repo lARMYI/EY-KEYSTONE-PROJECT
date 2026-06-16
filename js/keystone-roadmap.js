@@ -205,7 +205,38 @@
         ['New-profession roles filled','Orchestration engineers, AI risk officers, independence architects as real jobs.','~0','First roles filled','Standardized positions','↑'],
         ['Client Zero workflows on Keystone','EY running on its own governed systems before selling them.','Starting','Internal cohort live','Run-the-firm default','↑']
       ]}
-    ]
+    ],
+
+    /* ---- cross-cutting enablers the roadmap must also carry ---- */
+    enablers:[
+      ['Funding & P&L model','A capital ask, burn rate and break-even — and the economics behind "outcome-priced revenue." A managing partner funds a number, not a ladder.'],
+      ['Independence firewall','A named structural design separating commercial AI from assurance-client data and conflicts. This is the existential question for an audit firm — run it ahead of Phase 0, not as a Gate checkbox.'],
+      ['Data foundation & access rights','Whose data, under what consent, residency and contractual basis. "Governed data" is assumed in Q2 but is usually the twelve-month blocker.'],
+      ['Security & threat model','A secure-development lifecycle, an agent-compromise threat model, and an incident path for a production agent — beyond the red-team theatre the OS renders.'],
+      ['Legal, IP & liability','Who is liable when a certified agent gives a wrong regulated answer to a bank. Indemnity, professional-liability cover, insurance.'],
+      ['Client procurement & contracting','Bank vendor-risk onboarding is 9–18 months from LOI to production. The path from "signed LOI" to "live on governed data" needs its own track.'],
+      ['Change management & partner buy-in','Pyramid → diamond dismantles partner leverage and comp — a governance fight, not a training exercise — plus works-council and regional-labour engagement.'],
+      ['Vendor portability & exit','Heavy hyperscaler dependence needs portability and exit terms, or the "no-lose" thesis does not hold.'],
+      ['Evaluation & benchmark infrastructure','Who owns the baseline, the eval methodology, and how a regulator accepts "measured vs baseline" as evidence.'],
+      ['Talent pipeline','A hiring and comp plan for new professions — an Independence Architect barely exists on the market — not just a list of role names.'],
+      ['Regulator engagement','A proactive track so "certification published for inspection" is actually accepted, not just offered.'],
+      ['Compute cost & sustainability','A cost-to-serve floor and an ESG footprint for agent fleets at scale — the bill behind 100k agents.']
+    ],
+
+    /* ---- an honest read of the dates ---- */
+    realism:{
+      note:'The dates in this plan are capability-gated, not calendar-locked. A maturity level is reached when its evidence exists — not when a quarter ends. Two forces move slower than any Gantt chart in a regulated firm: independence and risk clearance, and client (bank) procurement. The honest read re-dates everything from Phase 2 onward by roughly +12 to +24 months and treats L5 as a destination, not a 2029 deliverable. Keep the ladder and the evidence discipline — detach them from the calendar.',
+      kill:'The stop-condition: if no governed banking agent is certified in production by 2028 Q2, halt and bank the IP. A no-lose option needs a stated failure that triggers walk-away — not only quarterly yes/no gates.',
+      dates:[
+        ['Phase 0 — Gate v1 cleared by Independence & Risk','2026 Q3','2027 Q1–Q2','Independence sign-off moves in regulatory cycles, not 90 days'],
+        ['First certified banking agent in production','2027 Q1','2027 H2 – 2028 H1','Bank vendor onboarding from LOI is 9–18 months'],
+        ['L3 — Orchestrated, at firm scale','2027','2028','One certified workflow is not yet an orchestrated firm'],
+        ['Second industry (insurance) certified','2028 Q1','2028 H2 – 2029','Depends on banking certifying first; independence differs by industry'],
+        ['L4 — certified fleets run production','2028','2030–2031','Multi-industry certified autonomy at scale is the hard part'],
+        ['100,000 governed agents','2028','2030+','A 1000× scale-up while holding 100% governance is the real constraint'],
+        ['L5 — AI-native operating model','2029 Q2','2031–2033','Re-shaping a 300k-person partnership is decade-scale']
+      ]
+    }
   };
 
   window.KEYSTONE_ROADMAP = R;
@@ -215,6 +246,16 @@
      ------------------------------------------------------------------ */
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  /* friendly names for the pitch sections a reader can return to */
+  const SECTION_LABELS = {
+    whynow:'Why now', thesis:'What changes', keystone:'What Keystone is',
+    lab:'Inside the Lab', build:'How the Lab builds', keystoneos:'Keystone AI OS',
+    truth:'The Truth Layer', trust:'The Gate', lighthouse:'Banking proof',
+    products:'Frontier to system', model:'The platform', partners:'Built with big tech',
+    adoption:'Market model', whyjohn:'Why John', decision:'The 90-day proof',
+    ask:'The scale path', nolose:'Why it is no-lose', flywheel:'How it compounds', shape:'The shape of it'
+  };
   const chips = arr => '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">'+
     arr.map(c=>'<span class="haveitem">'+c+'</span>').join('')+'</div>';
   const autofit = min => 'grid-template-columns:repeat(auto-fit,minmax('+min+',1fr))';
@@ -254,7 +295,7 @@
       '<h3 class="subhead reveal" style="border-left:3px solid '+g.color+';padding-left:14px">'+esc(g.group)+'</h3>'+
       '<div class="kf-grid reveal" style="'+autofit('280px')+'">'+
       g.kpis.map(k=>
-        '<div class="kf"><div class="kf-n" style="color:'+g.color+'">'+k[5]+' &nbsp;measure</div>'+
+        '<div class="kf"><div class="kf-n" style="color:'+g.color+'"><span aria-hidden="true">'+k[5]+'</span> '+(k[5]==='↑'?'higher is better':'lower is better')+'</div>'+
         '<div class="kf-t">'+esc(k[0])+'</div>'+
         '<p>'+esc(k[1])+'</p>'+
         '<div class="m" style="margin-top:12px"><span class="k">Today</span><span class="vv">'+esc(k[2])+'</span></div>'+
@@ -267,7 +308,7 @@
     el.innerHTML=R.pillars.map(p=>{
       const col=h=>'<div class="kf'+(h===p.h2?' kf-gold':'')+'"><div class="kf-n" style="color:'+p.color+'">'+esc(h[0])+'</div>'+
         '<div class="kf-t">'+esc(h[1])+'</div><p>'+esc(h[2])+'</p></div>';
-      return '<div class="ro-pillar reveal" style="margin-top:58px">'+
+      return '<div id="pillar-'+p.id+'" class="ro-pillar reveal" style="margin-top:58px;scroll-margin-top:96px">'+
         '<div class="kick"><span class="num">'+p.code+'</span><span class="tag">'+esc(p.tag)+'</span><span class="ln"></span></div>'+
         '<h3 class="h2 h2-sm" style="font-size:clamp(1.5rem,3.4vw,2.2rem)">'+esc(p.head)+'</h3>'+
         '<p class="lead">'+esc(p.what)+'</p>'+
@@ -300,8 +341,40 @@
     }).join('');
   }
 
+  function renderEnablers(el){
+    el.className='kf-grid';
+    el.style.cssText=autofit('250px');
+    el.innerHTML=R.enablers.map((e,i)=>
+      '<div class="kf reveal" style="--d:'+(i*0.03)+'s"><div class="kf-n">'+String(i+1).padStart(2,'0')+'</div>'+
+      '<div class="kf-t">'+esc(e[0])+'</div><p>'+esc(e[1])+'</p></div>').join('');
+  }
+
+  function renderRealism(el){
+    el.style.cssText='display:flex;flex-direction:column;gap:10px';
+    const row='display:grid;grid-template-columns:1.05fr 1.4fr;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)';
+    const head='font-family:var(--mono);font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);padding:12px 20px';
+    el.innerHTML=
+      '<div style="'+row+'">'+
+        '<div style="'+head+';border-left:4px solid var(--gold-2)">Milestone · plan&#39;s date</div>'+
+        '<div style="'+head+';border-left:1px solid var(--line)">Realistic · why</div>'+
+      '</div>'+
+      R.realism.dates.map((d,i)=>
+        '<div class="reveal" style="'+row+';--d:'+(i*0.04)+'s">'+
+          '<div style="padding:16px 20px;border-left:4px solid var(--gold-2)">'+
+            '<div style="font-weight:600;color:var(--ink);font-size:.94rem;line-height:1.3">'+esc(d[0])+'</div>'+
+            '<div style="font-family:var(--mono);font-size:11px;color:var(--gold-soft);margin-top:7px">plan: '+esc(d[1])+'</div>'+
+          '</div>'+
+          '<div style="padding:16px 20px;border-left:1px solid var(--line);background:linear-gradient(90deg,transparent,rgba(55,214,178,.06))">'+
+            '<div style="color:var(--teal);font-weight:700;font-size:.96rem">'+esc(d[2])+'</div>'+
+            '<div style="font-size:.85rem;color:var(--mut);margin-top:5px;line-height:1.45">'+esc(d[3])+'</div>'+
+          '</div>'+
+        '</div>').join('');
+  }
+
   function render(){
     let el;
+    if(el=$('ro-enablers')) renderEnablers(el);
+    if(el=$('ro-realism')) renderRealism(el);
     if(el=$('ro-chars')) renderChars(el);
     if(el=$('ro-levels')) renderLevels(el);
     if(el=$('ro-horizons')) renderHorizons(el);
@@ -358,7 +431,25 @@
     },1400);
   }
 
-  function boot(){ render(); runtime(); }
+  /* contextual "back to where you were" pill, when arrived via ?from= */
+  function renderBack(){
+    let from;
+    try{ from=new URLSearchParams(location.search).get('from'); }catch(e){ from=null; }
+    if(!from) return;
+    const known=Object.prototype.hasOwnProperty.call(SECTION_LABELS,from);
+    const label=known?SECTION_LABELS[from]:'the pitch';
+    const href=known?('index.html#'+from):'index.html';
+    const bar=document.createElement('div');
+    bar.className='ro-backbar';
+    const a=document.createElement('a');
+    a.href=href;
+    a.setAttribute('aria-label','Back to the pitch: '+label);
+    a.innerHTML='<span class="ba" aria-hidden="true">←</span> Back to: '+esc(label);
+    bar.appendChild(a);
+    document.body.appendChild(bar);
+  }
+
+  function boot(){ render(); renderBack(); runtime(); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
   else boot();
 })();

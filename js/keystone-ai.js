@@ -50,7 +50,7 @@
     ainative:{title:'Becoming AI-native', chips:['What does AI-native actually mean?','Where is EY on the maturity curve?','How do we measure success?'],
       text:'AI-native is not more AI — it is a different operating model: the default unit of work is a governed agent, knowledge and controls are executable, operations are software-defined, and capability compounds with every engagement. AI-enabled bolts AI onto the firm; AI-native rebuilds the firm as a governed system of agents, with people moving from doing the work to directing, supervising and governing it. Keystone frames the journey on a six-level ladder — L0 Manual, L1 Assisted, L2 Augmented, L3 Orchestrated, L4 Governed-autonomous, L5 AI-native. EY today sits around L1–L2; the decisive jump is L2→L3, where governance stops being a review you pass and becomes code that runs — the Gate. Three horizons: Today (AI-assisted), +12 months (governed systems in production, L3), +3 years (a governed substrate across industries, L4→L5). Success is tracked on a scorecard across capability & leverage, governance & trust, economics, and adoption & talent. Full detail lives on the roadmap supplement — roadmap.html, maturity.html, quarters.html. These levels, horizons and targets are Keystone-proposed planning artifacts, not EY commitments.'},
     roadmap:{title:'The roadmap to AI-native', chips:['Show me the 3-year plan','What are the quarterly goals?','How do the pillars mature?'],
-      text:'The transition runs over three years and twelve quarters, staged in four phases that mirror the scale path: Phase 0 Foundation (60–90 days), Phase 1 Banking Proving Ground (6–9 months), Phase 2 Systems Scale (12–18 months), Phase 3 Global Substrate (24–36 months). Each quarter carries a theme, a target maturity level and a yes/no measure — the 90-day proof’s evidence discipline extended across three years. Seven pillars each climb the ladder: the Lab (how EY builds), Keystone OS (environment-as-code runtime), the Gate (trust & certification), the Truth Layer (knowledge & AI memory), Workforce & Capability (pyramid→diamond), Proving Grounds (banking→multi-industry), and Operating Model & Economics (hours→productized, outcome-priced capacity — services-as-software). The market is moving the same way: peers are standing up agent operating systems (KPMG Workbench, PwC Agent OS, Deloitte Zora) and pricing is shifting from hours to outcomes. The roadmap supplement renders all of it — roadmap.html (definition, ladder, horizons, scorecard), maturity.html (the pillars), quarters.html (the quarterly plan).'}
+      text:'The transition runs over three years and twelve quarters, staged in four phases that mirror the scale path: Phase 0 Foundation (60–90 days), Phase 1 Banking Proving Ground (6–9 months), Phase 2 Systems Scale (12–18 months), Phase 3 Global Substrate (24–36 months). Each quarter carries a theme, a target maturity level and a yes/no measure — the 90-day proof’s evidence discipline extended across three years. Seven pillars each climb the ladder: the Lab (how EY builds), Keystone OS (environment-as-code runtime), the Gate (trust & certification), the Truth Layer (knowledge & AI memory), Workforce & Capability (pyramid→diamond), Proving Grounds (banking→multi-industry), and Operating Model & Economics (hours→productized, outcome-priced capacity — services-as-software). The market is moving the same way: peers are standing up agent operating systems (KPMG Workbench, PwC Agent OS, Deloitte Zora) and pricing is shifting from hours to outcomes. The roadmap supplement renders all of it — roadmap.html (definition, ladder, horizons, scorecard, plus twelve cross-cutting enablers the plan must also carry: funding, an independence firewall, data access, security, liability, client procurement, change management, vendor exit, evaluation, talent, regulator engagement, compute cost), maturity.html (the pillars), quarters.html (the quarterly plan and an honest, capability-gated read of the dates — independence clearance and bank procurement move slower than any Gantt chart, so the later phases re-date by roughly +12–24 months and L5 is a destination, not a 2029 deliverable).'}
   };
   const GLOBAL_CHIPS = ['What does EY already have \u2014 and what\u2019s missing?','What happens if EY waits?','Show me the scale \u2014 charted','What would a skeptical managing partner ask?'];
 
@@ -75,7 +75,8 @@
     ['Transformation horizons',3,'horizons'],
     ['Development plan',12,'quarters'],
     ['Transformation pillars',7,'pillars'],
-    ['Delivery phases',4,'phases']
+    ['Delivery phases',4,'phases'],
+    ['Cross-cutting enablers',12,'workstreams']
   ];
   const FACTS_TEXT='DATA TABLE \u2014 the only chartable values (label | value | unit). Chart values verbatim; one consistent unit per chart; NEVER chart zeros, projections, or values not on this table:\n'+
     FACTS.map(f=>f[0]+' | '+f[1]+' | '+f[2]).join('\n');
@@ -504,6 +505,8 @@ Reply ONLY a JSON object (no prose, no fences):\n{"challenge":"the single toughe
   }
 
   /* meta row: certification + confidence + actions + follow-ups */
+  /* KB topics that live on the roadmap supplement, not on this page */
+  const SUPP={ainative:'roadmap.html',roadmap:'roadmap.html'};
   function decorate(node,meta,secId,answerText,evidence,followups,conf,basis){
     const body=node.querySelector('.kai-body');
     const row=document.createElement('div'); row.className='kai-meta';
@@ -518,9 +521,10 @@ Reply ONLY a JSON object (no prose, no fences):\n{"challenge":"the single toughe
     }
     row.innerHTML=html;
     if(secId&&KB[secId]){
+      const onPage=!!document.getElementById(secId);
       const j=document.createElement('button'); j.className='kai-jump'; j.textContent=KB[secId].title+' \u2197';
-      j.title='Jump to this section';
-      j.onclick=()=>{ const el=document.getElementById(secId); if(el){ closePanel(); window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-70,behavior:reduceMotion?'auto':'smooth'}); } };
+      j.title=onPage?'Jump to this section':(SUPP[secId]?'Open the roadmap supplement':'Jump to this section');
+      j.onclick=()=>{ const el=document.getElementById(secId); if(el){ closePanel(); window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-70,behavior:reduceMotion?'auto':'smooth'}); } else if(SUPP[secId]){ window.location.href=SUPP[secId]; } };
       row.appendChild(j);
     }
     const cp=document.createElement('button'); cp.className='kai-copy'; cp.textContent='copy'; cp.title='Copy reply';
