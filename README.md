@@ -91,7 +91,19 @@ To wire a real backend, define the same contract **before** `js/keystone-ai.js` 
 </script>
 ```
 
-Keep the model call server-side — never ship API keys in this page.
+Keep the model call server-side — never ship API keys in this page. There are no secrets in this repo: the only model path is the `window.claude.complete({messages})` contract, which an integrator wires to a same-origin endpoint (`connect-src 'self'`). No API key, token, or `Authorization` header is ever shipped to the browser.
+
+## Security headers (CSP + SRI)
+
+Defense-in-depth against injection and CDN compromise, verified with a headless-browser pass (0 CSP violations, 0 page errors, all interactions intact):
+
+- **Content-Security-Policy** ships two ways so it applies on every host:
+  - a `<meta http-equiv="Content-Security-Policy">` tag in every HTML page (works even on GitHub Pages, which can't set headers);
+  - a real header in **`_headers`** (Netlify / Cloudflare Pages) that additionally carries the header-only directives (`frame-ancestors`, `X-Frame-Options`, `Referrer-Policy`, `X-Content-Type-Options`, `Permissions-Policy`, `COOP`).
+  - Policy: `default-src 'self'`; `script-src 'self' https://cdnjs.cloudflare.com` (`'self'` only on the supplement pages — they don't load three.js); `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com` (the site uses inline `style=` attributes); `font-src 'self' https://fonts.gstatic.com`; `img-src 'self' data:` (the CSS grain is a data-URI SVG); `connect-src 'self'`; `object-src 'none'`; `base-uri 'self'`. No inline `<script>` and no `'unsafe-eval'`, so `script-src` stays strict.
+  - **Keep the `<meta>` CSP and the `_headers` CSP in sync** when editing.
+- **Subresource Integrity (SRI)** pins **three.js r128** on cdnjs (`integrity="sha512-…"` + `crossorigin="anonymous"`) so a tampered CDN file is refused — and if it ever is, the 3D keystone falls back silently to the SVG arch, so the page never breaks. The hash is the published cdnjs r128 value; re-verify at deploy with [srihash.org](https://www.srihash.org/) if you bump the version.
+- **Google Fonts is intentionally *not* SRI-pinned:** the `fonts.googleapis.com` CSS is served per-browser (different `unicode-range` / formats), so a fixed hash would break fonts on some user agents. CSP (`style-src`/`font-src` allow-listing) is the correct control there; a compromised font CSS still cannot execute script (`script-src` forbids it). For true pinning, self-host the fonts.
 
 ## Robustness notes
 
