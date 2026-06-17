@@ -14,7 +14,7 @@ python3 -m http.server 8000
 # then open http://localhost:8000
 ```
 
-Or deploy as-is to GitHub Pages / Netlify / any static host (`index.html` is the entry point). Three.js (r128) and the Fraunces / Hanken Grotesk / JetBrains Mono fonts load from CDNs, so a network connection is needed for the full experience.
+Or deploy as-is to GitHub Pages / Netlify / any static host (`index.html` is the entry point). The fonts (Fraunces / Hanken Grotesk / JetBrains Mono) are **self-hosted** in `fonts/`, so the page renders fully offline; the only external request is Three.js (r128) from cdnjs on the main page, and it falls back to a drawn SVG arch if that can't load.
 
 ## What's on the page
 
@@ -44,6 +44,9 @@ roadmap.html           supplement — "Becoming AI-native": definition, maturity
 maturity.html          supplement — the seven transformation pillars, charted across the three horizons
 quarters.html          supplement — the twelve-quarter development plan (Phase 0 → Phase 3)
 css/keystone.css       the full design system (tokens, atmosphere, components, chat)
+css/fonts.css          self-hosted @font-face (replaces the Google Fonts CDN)
+fonts/                 Fraunces / Hanken Grotesk / JetBrains Mono variable WOFF2 (latin)
+_headers               security headers (CSP etc.) for Netlify / Cloudflare Pages
 js/keystone3d.js       WebGL keystone spine (Three.js r128, progressive enhancement)
 js/keystone.js         core: reveals, counters, flywheel, generated grids, health fallback
 js/gate.js             interactive Gate certification + Agent Passport
@@ -100,10 +103,10 @@ Defense-in-depth against injection and CDN compromise, verified with a headless-
 - **Content-Security-Policy** ships two ways so it applies on every host:
   - a `<meta http-equiv="Content-Security-Policy">` tag in every HTML page (works even on GitHub Pages, which can't set headers);
   - a real header in **`_headers`** (Netlify / Cloudflare Pages) that additionally carries the header-only directives (`frame-ancestors`, `X-Frame-Options`, `Referrer-Policy`, `X-Content-Type-Options`, `Permissions-Policy`, `COOP`).
-  - Policy: `default-src 'self'`; `script-src 'self' https://cdnjs.cloudflare.com` (`'self'` only on the supplement pages — they don't load three.js); `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com` (the site uses inline `style=` attributes); `font-src 'self' https://fonts.gstatic.com`; `img-src 'self' data:` (the CSS grain is a data-URI SVG); `connect-src 'self'`; `object-src 'none'`; `base-uri 'self'`. No inline `<script>` and no `'unsafe-eval'`, so `script-src` stays strict.
+  - Policy: `default-src 'self'`; `script-src 'self' https://cdnjs.cloudflare.com` (`'self'` only on the supplement pages — they don't load three.js); `style-src 'self' 'unsafe-inline'` (the site uses inline `style=` attributes); `font-src 'self'` and `img-src 'self' data:` (fonts are self-hosted; the CSS grain is a data-URI SVG); `connect-src 'self'`; `object-src 'none'`; `base-uri 'self'`. No inline `<script>`, no `'unsafe-eval'`, and no third-party origins except the cdnjs three.js on the index page.
   - **Keep the `<meta>` CSP and the `_headers` CSP in sync** when editing.
 - **Subresource Integrity (SRI)** pins **three.js r128** on cdnjs (`integrity="sha512-…"` + `crossorigin="anonymous"`) so a tampered CDN file is refused — and if it ever is, the 3D keystone falls back silently to the SVG arch, so the page never breaks. The hash is the published cdnjs r128 value; re-verify at deploy with [srihash.org](https://www.srihash.org/) if you bump the version.
-- **Google Fonts is intentionally *not* SRI-pinned:** the `fonts.googleapis.com` CSS is served per-browser (different `unicode-range` / formats), so a fixed hash would break fonts on some user agents. CSP (`style-src`/`font-src` allow-listing) is the correct control there; a compromised font CSS still cannot execute script (`script-src` forbids it). For true pinning, self-host the fonts.
+- **Fonts are self-hosted (no SRI needed):** the Google Fonts CDN dependency was removed. The Fraunces / Hanken Grotesk / JetBrains Mono variable WOFF2s (latin subset) live in `fonts/`, declared by `css/fonts.css`, and load same-origin under `default-src 'self'` — so there is no per-browser CSS variance and nothing third-party to pin. (SRI doesn't apply to `@font-face` files anyway; same-origin + CSP is the control.) The latin `unicode-range` covers all the site's Latin text; the few decorative glyphs (◆ → ← ↗) fall back to the system font, exactly as before.
 
 ## Robustness notes
 
