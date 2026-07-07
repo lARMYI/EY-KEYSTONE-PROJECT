@@ -1187,8 +1187,8 @@
   @media(max-width:640px){.srcs li{grid-template-columns:34px 1fr}.srcs .st{grid-column:2}}
 
   /* ============ THREE FUTURES (01·B) ============ */
-  .futures{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-  @media(max-width:900px){.futures{grid-template-columns:1fr}}
+  /* container-intrinsic columns: stays right when the kai drawer's margin shift narrows the page */
+  .futures{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
   .future{border:1px solid var(--line);border-radius:18px;padding:24px;background:var(--panel);display:flex;flex-direction:column;gap:0;
     background-image:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,0) 42%);box-shadow:var(--sh);
     transition:transform .35s cubic-bezier(.2,.7,.2,1),border-color .35s,box-shadow .35s}
@@ -1227,8 +1227,13 @@
     background:none;border:none;border-radius:30px;padding:7px 15px;cursor:pointer;transition:color .25s,background .25s,box-shadow .25s}
   .intel-lens:hover{color:var(--ink)}
   .intel-lens.on{background:var(--metal);color:#160d01;font-weight:700;box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 8px 20px -10px rgba(233,184,74,.8)}
+  /* 4 or 2 columns (the 1px-gap background trick needs complete rows), driven by the
+     deck's own width so the kai drawer's margin shift is respected; @media fallback below */
+  .intel{container-type:inline-size}
   .intel-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line)}
   @media(max-width:680px){.intel-kpis{grid-template-columns:repeat(2,1fr)}}
+  @container(max-width:680px){.intel-kpis{grid-template-columns:repeat(2,1fr)}}
+  @container(min-width:681px){.intel-kpis{grid-template-columns:repeat(4,1fr)}}
   .intel-kpi{background:var(--bg2);padding:20px 18px 14px;text-align:left;position:relative;overflow:hidden}
   .ik-v{font-family:var(--disp);font-weight:700;font-size:clamp(1.6rem,3.4vw,2.3rem);line-height:1;letter-spacing:-.01em;
     background:var(--metal);-webkit-background-clip:text;background-clip:text;color:transparent;padding-bottom:.08em}
@@ -1359,13 +1364,14 @@
   .kt-go:hover{transform:translateY(-1px)}
   .kt-x{background:none;border:none;color:var(--dim);font-size:1.1rem;cursor:pointer;padding:2px 6px;line-height:1;transition:color .2s}
   .kt-x:hover{color:var(--ink)}
-  @media(max-width:560px){.klens-toast{bottom:84px}}
+  @media(max-width:900px){.klens-toast{bottom:84px}}   /* clear the two floating fabs across the whole collision band */
   body.no-anim .klens-toast{transition:none}
   @media(prefers-reduced-motion:reduce){.klens-toast{transition:none}}
 
   /* ============ COMMAND-DECK HONESTY BADGE + MEMO ACTIONS ============ */
-  .intel-badge{align-self:center;white-space:nowrap}
+  .intel-badge{align-self:center;white-space:nowrap;max-width:100%}
   @media(max-width:760px){.intel-head{justify-content:flex-start}.intel-badge{order:3}}
+  @media(max-width:380px){.intel-badge{white-space:normal;text-align:center;line-height:1.7}}
   .memo-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:20px;padding-top:18px;border-top:1px dashed var(--line-warm)}
   .memo-actions-n{font-size:.84rem;color:var(--dim);font-style:italic}
 
@@ -1394,7 +1400,7 @@
     body>*:not(#printbrief){display:none!important}
     #printbrief{display:block!important;color:#14181f;font-family:var(--ui);padding:0;max-width:100%}
     #printbrief .pb-head{display:flex;gap:14pt;align-items:flex-start;border-bottom:2pt solid #b98a1e;padding-bottom:10pt;margin-bottom:12pt}
-    #printbrief .pb-mark{width:22pt;height:22pt;background:#b98a1e;clip-path:polygon(0 0,100% 0,78% 100%,22% 100%);flex-shrink:0;margin-top:3pt}
+    #printbrief .pb-mark{width:22pt;height:22pt;background:#b98a1e;clip-path:polygon(0 0,100% 0,78% 100%,22% 100%);flex-shrink:0;margin-top:3pt;print-color-adjust:exact;-webkit-print-color-adjust:exact}
     #printbrief .pb-kicker{font-family:var(--mono);font-size:7.5pt;letter-spacing:1.5pt;text-transform:uppercase;color:#8a6a1e;margin-bottom:5pt}
     #printbrief h1{font-family:var(--disp);font-size:16.5pt;font-weight:600;line-height:1.18;color:#14181f;margin:0}
     #printbrief h2{font-family:var(--disp);font-size:11.5pt;font-weight:700;margin:12pt 0 6pt;color:#14181f}

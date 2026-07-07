@@ -17,6 +17,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/keystone.css">
+<noscript><style>
+  /* no JS: force-reveal everything and finish the simulations' end states;
+     hide hints for interactions that need JS */
+  .reveal{opacity:1;transform:none}
+  .heroeye,.herosub,.herobtns,.scrollcue,.hero-disc{opacity:1;animation:none}
+  .hero-title .word{opacity:1;transform:none;animation:none}
+  .kos-log{opacity:1;transform:none}.kos-fill{width:100%}.kos-cert{opacity:1}
+  #readyHint,.memo-actions{display:none}
+  .keydiv{opacity:1}
+</style></noscript>
 </head>
 <body>
 <div class="atmos" aria-hidden="true">
@@ -350,10 +360,10 @@
       </div>
     </div>
     <div class="intel-kpis" id="intelKpis">
-      <div class="intel-kpi"><div class="ik-v" data-target="12">0</div><div class="ik-c">Governed agents in production</div><svg class="ik-spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"></svg></div>
-      <div class="intel-kpi"><div class="ik-v" data-prefix="+" data-target="47" data-suffix="%">0</div><div class="ik-c">Value vs manual baseline · in the 40–60% target band</div><svg class="ik-spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"></svg></div>
-      <div class="intel-kpi"><div class="ik-v" data-target="100" data-suffix="%">0</div><div class="ik-c">Evidence coverage</div><svg class="ik-spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"></svg></div>
-      <div class="intel-kpi"><div class="ik-v" data-target="4" data-suffix="/6">0</div><div class="ik-c">Day-90 gates green</div><svg class="ik-spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+      <div class="intel-kpi"><div class="ik-v" data-target="12">12</div><div class="ik-c">Governed agents in the simulated proving ground</div><svg class="ik-spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+      <div class="intel-kpi"><div class="ik-v" data-prefix="+" data-target="47" data-suffix="%">+47%</div><div class="ik-c">Value vs manual baseline · in the 40–60% target band</div><svg class="ik-spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+      <div class="intel-kpi"><div class="ik-v" data-target="100" data-suffix="%">100%</div><div class="ik-c">Evidence coverage</div><svg class="ik-spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+      <div class="intel-kpi"><div class="ik-v" data-target="4" data-suffix="/6">4/6</div><div class="ik-c">Day-90 gates green</div><svg class="ik-spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"></svg></div>
     </div>
     <div class="intel-feed" id="intelFeed" role="group" aria-label="Simulated intelligence signals">
       <div class="intel-sig"><i class="sd ok"></i><span class="ss">gate</span><span class="sm">2 agents certified this run · passports issued</span><span class="st2">now</span></div>

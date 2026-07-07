@@ -83,7 +83,7 @@ Keep the model call server-side — never ship API keys in this page.
 
 Built into the design and worth preserving when editing:
 
-- **Progressive enhancement everywhere** — no WebGL → SVG arch; no LLM → static-brief chat fallback; no fine pointer → tilt/halo disabled; no JS → the lens layer and interactive boards simply don't appear, and the readiness checklist still reads as a checklist.
+- **Progressive enhancement everywhere** — no WebGL → SVG arch; no LLM → static-brief chat fallback; no fine pointer → tilt/halo disabled; no JS → a `<noscript>` rule force-reveals all content and simulation end-states, the command deck renders its authored day-90 figures statically, the readiness checklist reads as a plain checklist (its "flip each gate" hint and print button hide), and the lens/chat layers simply don't appear.
 - **Animation-health fallback** — if the document timeline freezes (throttled/background tab), everything force-reveals to its end state and counters fill in; a watcher restores animation when the tab recovers.
 - **Reduced motion** — `prefers-reduced-motion` collapses animations to instant states across all modules.
 - **Accessibility** — keyboard-operable disclosure rows (OS stack, risk matrix), `aria-expanded` state, labeled canvases, `aria-live` chat log, Escape closes the drawer.

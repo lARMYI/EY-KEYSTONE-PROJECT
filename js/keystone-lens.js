@@ -113,7 +113,15 @@
   }catch(e){}
 
   /* ---------- public surface for the briefing agent ---------- */
-  window.KeystoneLens = { get(){ return { id: lens, label: PERSONAS[lens].label }; } };
+  window.KeystoneLens = {
+    get(){ return { id: lens, label: PERSONAS[lens].label }; },
+    /* the authored per-section note for the active lens — lets the agent's
+       static-brief fallback answer "in your language" without a model */
+    note(secId){
+      const n = NOTES[secId];
+      return (lens !== 'general' && n && n[lens]) ? { label: PERSONAS[lens].label, text: n[lens] } : null;
+    },
+  };
   const announce = () => { try{ dispatchEvent(new CustomEvent('keystone:lens', { detail: window.KeystoneLens.get() })); }catch(e){} };
 
   /* ---------- UI scaffold ---------- */

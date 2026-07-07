@@ -26,7 +26,7 @@
     const LENSES = {
       board: {
         kpis: [
-          { v:12,           c:'Governed agents in production', sp:series(11, 8, 8, 14) },
+          { v:12,           c:'Governed agents in the simulated proving ground', sp:series(11, 8, 8, 14) },
           { v:47, pre:'+', suf:'%', c:'Value vs manual baseline · in the 40–60% target band', sp:series(23, 9, 9, 14) },
           { v:100, suf:'%', c:'Evidence coverage',              sp:series(31, 19, 3, 14) },
           { v:4,  suf:'/6', c:'Day-90 gates green',             sp:series(47, 7, 7, 14) },
@@ -39,7 +39,7 @@
           ['ok','decision','target state: 4 of 6 day-90 gates green · 2 open with owners','15m'],
         ],
         pool: [
-          ['ok','marketplace','1 certified system listed for reuse'],
+          ['ok','marketplace','target state: 1 certified system listed for reuse'],
           ['ok','gate','re-certification cadence met · 12/12 in window'],
           ['warn','partner','target state: compute commitment · term sheet in legal review'],
         ],
@@ -68,24 +68,24 @@
       },
       delivery: {
         kpis: [
-          { v:500, c:'Synthetic customers in run',      sp:series(91, 11, 9, 14) },
-          { v:28,  c:'Primitives reused from library',  sp:series(101, 8, 8, 14) },
-          { v:44, pre:'−', suf:'%', c:'Cycle time vs baseline', sp:series(113, 9, 8, 14) },
-          { v:61,  c:'Agent supervisors trained',       sp:series(127, 7, 7, 14) },
+          { v:500, c:'Synthetic customers in the simulated run', sp:series(91, 11, 9, 14) },
+          { v:28,  c:'Primitives reused · Phase-1 target',       sp:series(101, 8, 8, 14) },
+          { v:44, pre:'−', suf:'%', c:'Cycle time vs baseline · in the 40–60% target band', sp:series(113, 9, 8, 14) },
+          { v:61,  c:'Supervisors trained · Phase-1 target',     sp:series(127, 7, 7, 14) },
         ],
         feed: [
-          ['ok','assembly','primitive reused: eval-harness v3 · build −12 days','now'],
-          ['ok','workflow.kyc','132 cases cleared inside approved lanes','3m'],
+          ['ok','assembly','target state: primitive reused: eval-harness v3 · build −12 days','now'],
+          ['ok','workflow.kyc','132 simulated cases cleared inside approved lanes','3m'],
           ['warn','workflow.tprm','1 case escalated to human supervisor · in lane','6m'],
-          ['ok','capability','12 new supervisors certified on governed ops','10m'],
-          ['ok','graduation','1 system componentized for the shared library','14m'],
+          ['ok','capability','target state: 12 supervisors certified on governed ops','10m'],
+          ['ok','graduation','target state: 1 system componentized for the library','14m'],
         ],
         pool: [
-          ['ok','assembly','control-pack template reused · config only'],
-          ['ok','workflow.reg-report','draft filed for supervisor review'],
-          ['warn','capacity','FDT#2 at 85% allocation · hiring gate open'],
+          ['ok','assembly','target state: control-pack template reused · config only'],
+          ['ok','workflow.reg-report','target state: draft filed for supervisor review'],
+          ['warn','capacity','target state: FDT#2 at 85% allocation · hiring gate open'],
         ],
-        brief: 'In this replay, delivery compounds: reused primitives cut build time while trained supervisors absorb the throughput. The claim being tested: the second engagement is faster than the first.',
+        brief: 'This room rehearses what comes after a yes: if day 90 scales, reused primitives and trained supervisors are what the ledger must show by Phase 1. The claim being tested — the second engagement is faster than the first.',
       },
     };
 
