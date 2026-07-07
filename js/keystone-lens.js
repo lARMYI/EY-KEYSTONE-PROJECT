@@ -104,10 +104,12 @@
 
   let lens = 'general';
   try{ const saved = localStorage.getItem('ksLens'); if(saved && PERSONAS[saved]) lens = saved; }catch(e){}
-  /* ?lens= deep link wins over the saved choice — lets a forwarded link say "read this as Risk" */
+  /* ?lens= deep link wins over the saved choice for THIS visit — a forwarded link can say
+     "read this as Risk" without silently overwriting the reader's own saved pick */
+  let viaLink = false;
   try{
     const q = new URLSearchParams(location.search).get('lens');
-    if(q && PERSONAS[q]) lens = q;
+    if(q && PERSONAS[q]){ lens = q; viaLink = true; }
   }catch(e){}
 
   /* ---------- public surface for the briefing agent ---------- */
@@ -120,7 +122,7 @@
     '<button class="klens-fab" id="klensFab" aria-expanded="false" aria-controls="klensPanel">' +
       '<span class="klens-gem" aria-hidden="true">◈</span><span class="klens-fab-t">Lens · <b id="klensCur">General</b></span>' +
     '</button>' +
-    '<div class="klens-panel" id="klensPanel" role="dialog" aria-label="Choose your briefing lens">' +
+    '<div class="klens-panel" id="klensPanel" role="group" aria-label="Choose your briefing lens">' +
       '<div class="klens-t">Read this pitch from your seat</div>' +
       '<div class="klens-s">The page adapts its callouts — and the briefing agent answers in your language.</div>' +
       '<div class="klens-opts" id="klensOpts" role="group" aria-label="Briefing lens"></div>' +
@@ -144,7 +146,10 @@
   });
 
   function openPanel(){ panel.classList.add('open'); fab.setAttribute('aria-expanded','true'); }
-  function closePanel(){ panel.classList.remove('open'); fab.setAttribute('aria-expanded','false'); }
+  function closePanel(){
+    if(panel.contains(document.activeElement)) fab.focus();   // don't strand keyboard focus in the hidden panel
+    panel.classList.remove('open'); fab.setAttribute('aria-expanded','false');
+  }
   fab.addEventListener('click', () => panel.classList.contains('open') ? closePanel() : openPanel());
   addEventListener('keydown', e => { if(e.key === 'Escape' && panel.classList.contains('open')) closePanel(); });
   addEventListener('pointerdown', e => {
@@ -162,6 +167,7 @@
         const sec = document.getElementById(secId); if(!sec) return;
         const anchor = sec.querySelector('.wrap .lead') || sec.querySelector('.wrap .h2'); if(!anchor) return;
         el = document.createElement('aside');
+        el.setAttribute('role', 'note');   // don't spray a dozen unnamed complementary landmarks
         el.className = 'lens-note';
         el.innerHTML = '<span class="ln-k" aria-hidden="true">◈</span><div><span class="ln-l"></span><p></p></div>';
         anchor.insertAdjacentElement('afterend', el);
@@ -186,11 +192,12 @@
     });
   }
 
-  function setLens(id){
+  function setLens(id, persist){
     lens = id;
-    try{ localStorage.setItem('ksLens', id); }catch(e){}
+    if(persist !== false){ try{ localStorage.setItem('ksLens', id); }catch(e){} }
     document.body.dataset.lens = id;
     cur.textContent = PERSONAS[id].short;
+    fab.setAttribute('aria-label', 'Briefing lens: ' + PERSONAS[id].label);  // named even when the text hides on small screens
     opts.querySelectorAll('.klens-opt').forEach(b => {
       const on = b.dataset.lens === id;
       b.classList.toggle('on', on);
@@ -200,7 +207,7 @@
     applyNotes();
     announce();
   }
-  setLens(lens);
+  setLens(lens, !viaLink);
 
   /* ---------- remember where the reader left off ---------- */
   const SECS = [...document.querySelectorAll('section.sec[id]')];
@@ -238,6 +245,10 @@
     });
     toast.querySelector('.kt-x').addEventListener('click', kill);
     setTimeout(() => toast.classList.add('in'), still() ? 0 : 1400);
-    setTimeout(kill, 16000);
+    /* auto-dismiss, but never while the reader is interacting with it */
+    let killT = setTimeout(kill, 16000);
+    const stay = () => { clearTimeout(killT); killT = setTimeout(kill, 30000); };
+    toast.addEventListener('mouseenter', stay);
+    toast.addEventListener('focusin', stay);
   })();
 })();

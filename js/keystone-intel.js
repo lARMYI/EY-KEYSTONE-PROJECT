@@ -176,7 +176,9 @@
     /* first activation on scroll-into-view; static render as safety */
     render('board', false);
     const go = () => { if(seen) return; seen = true; render(current, true);
-      if(!still()) rotTimer = setInterval(rotate, 5200); };
+      /* arm unconditionally except for immutable reduced-motion — rotate()
+         self-gates per tick, so rotation resumes if a frozen tab recovers */
+      if(!reduce) rotTimer = setInterval(rotate, 5200); };
     let obsAlive = false;
     try{
       const obs = new IntersectionObserver(es => es.forEach(e => {
@@ -219,8 +221,7 @@
       r.setAttribute('role', 'switch');
       r.setAttribute('tabindex', '0');
       r.setAttribute('aria-checked', 'false');
-      const label = r.querySelector('.rr-t');
-      if(label) r.setAttribute('aria-label', 'Day-90 gate: ' + label.textContent);
+      /* accessible name comes from the row's own contents (title + detail) — no aria-label override */
       const toggle = () => {
         const on = r.classList.toggle('on');
         r.setAttribute('aria-checked', on ? 'true' : 'false');

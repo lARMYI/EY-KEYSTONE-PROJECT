@@ -89,7 +89,7 @@
     const stamps = STEPS.map(s=>`<span class="pp-stamp">${s.stamp}<i>✓</i></span>`).join('');
     const cells = [...hash].map(b=>`<i class="${b==='1'?'on':''}"></i>`).join('');
     stage.innerHTML = `
-      <div class="passport" id="passport" role="img" aria-label="Agent Passport — Certified">
+      <div class="passport" id="passport" role="group" aria-label="Agent Passport — Certified">
         <div class="pp-sheen" aria-hidden="true"></div>
         <div class="pp-top">
           <div class="pp-seal"><span class="pp-key"></span></div>

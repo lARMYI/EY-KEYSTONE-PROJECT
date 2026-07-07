@@ -637,6 +637,7 @@ Reply ONLY a JSON object (no prose, no fences):\n{"challenge":"the single toughe
     }catch(e){
       try{ console.warn('KAI_ANSWER_ERR', e && (e.stack||e.message||e)); }catch(_){}
       node.remove();
+      lastRole=null;   // the removed node set lastRole='bot'; reset so the fallback keeps its avatar
       staticAnswer(userText,sec);
     }
   }
