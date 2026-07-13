@@ -87,6 +87,8 @@
     mk2:{s:'market',t:'Deloitte runs a Global AI Simulation Center of Excellence: simulations, scenario modeling, digital twins and multi-agent systems',src:'Deloitte press room',d:'2025',u:'https://www.deloitte.com/global/en/about/press-room/global-gen-ai-simulation-center-of-excellence.html'},
     mk3:{s:'market',t:'KPMG publishes a Trusted AI framework: AI lifecycle governance, trust, assurance, monitoring, transparency and accountability',src:'KPMG',d:'2025',u:'https://kpmg.com/xx/en/what-we-do/services/ai/trusted-ai-framework.html'},
     mk4:{s:'market',t:'Accenture sells AI Refinery: preconfigured industry agent solutions and enterprise orchestration',src:'Accenture',d:'2025',u:'https://www.accenture.com/us-en/services/ai-data/ai-refinery'},
+    mk5:{s:'market',t:'KPMG frames the agentic workforce: digital teammates and new roles (orchestration engineer, AI governance and risk specialist)',src:'KPMG "Agents of change"',d:'Dec 2025',u:'https://kpmg.com/us/en/articles/2025/agents-change-new-organizational-roles-ai.html'},
+    mk6:{s:'market',t:'Accenture launched AI Navigator for Enterprise (with its US$3B AI investment) to help clients choose architectures and models responsibly',src:'Accenture Newsroom',d:'Jun 2023',u:'https://newsroom.accenture.com/news/2023/accenture-to-invest-3-billion-in-ai-to-accelerate-clients-reinvention'},
     ks1:{s:'keystone-proposed',t:'Keystone proposes the governed systems lab \u2014 the Gate, Keystone OS runtime, evidence ledger, certification model, industry proving grounds \u2014 producing governed apps, solutions, agents and modernized core technology, plus net-new frontier systems',src:'Keystone working concept',d:'authored'},
     ks2:{s:'keystone-proposed',t:'Banking is the first proving ground, with three named demonstrators',src:'Keystone working concept',d:'authored'},
     ks3:{s:'keystone-proposed',t:'A 90-day proof where every line is a yes or no; staged as a no-lose option',src:'Keystone working concept',d:'authored'},
@@ -130,12 +132,15 @@ Rules:
              top: bestRawS>1 ? bestRaw : currentId };
   }
 
+  /* cache the section list once (DOM is static after load) instead of
+     re-querying + measuring ~21 nodes on every scroll event */
+  const SECS=[...document.querySelectorAll('section.sec[id], header.hero[id]')].filter(el=>KB[el.id]);
   function currentSection(){
     const mid=innerHeight*0.42; let best='whynow';
-    document.querySelectorAll('section.sec[id], header.hero[id]').forEach(el=>{
+    for(const el of SECS){
       const r=el.getBoundingClientRect();
-      if(r.top<=mid && r.bottom>=mid && KB[el.id]) best=el.id;
-    });
+      if(r.top<=mid && r.bottom>=mid){ best=el.id; break; }
+    }
     return best;
   }
 
@@ -154,7 +159,8 @@ Rules:
         <button class="kai-hbtn" id="kaiX" aria-label="Close" title="Close">\u00d7</button>
       </div>
       <div class="kai-ctxbar"><span class="kai-ctx-l">Reading with you</span><span class="kai-ctx" id="kaiCtx">Why now</span></div>
-      <div class="kai-log" id="kaiLog" aria-live="polite"></div>
+      <div class="kai-log" id="kaiLog"></div>
+      <div class="kai-sr" id="kaiStatus" role="status" aria-live="polite"></div>
       <button class="kai-down" id="kaiDown" aria-label="Jump to latest">\u2193</button>
       <form class="kai-input" id="kaiForm">
         <input id="kaiText" autocomplete="off" placeholder="Ask, or push back\u2026" aria-label="Message Keystone"/>
@@ -165,9 +171,15 @@ Rules:
 
   const fab=root.querySelector('#kaiFab'), panel=root.querySelector('#kaiPanel'),
         logEl=root.querySelector('#kaiLog'), ctxEl=root.querySelector('#kaiCtx'),
+        statusEl=root.querySelector('#kaiStatus'),
         form=root.querySelector('#kaiForm'), input=root.querySelector('#kaiText'),
         sendBtn=root.querySelector('#kaiSend'), downBtn=root.querySelector('#kaiDown');
   let history=[], busy=false, openSection='whynow', lastRole=null;
+  /* single polite status channel for screen readers — the streaming log itself
+     is NOT a live region (word-by-word inserts would be announced as noise);
+     we announce "answering…" and then the finished reply once, as a unit. */
+  function srSay(msg){ if(statusEl){ statusEl.textContent=''; statusEl.textContent=String(msg||''); } }
+  const plain=s=>String(s==null?'':s).replace(/```(?:chart)?[\s\S]*?```/g,' ').replace(/[*`#>_]/g,'').replace(/\n?\s*GROUNDING\s*:.*$/i,'').replace(/\s+/g,' ').trim();
 
   const atBottom=()=> logEl.scrollHeight-logEl.scrollTop-logEl.clientHeight<60;
   const toBottom=()=>{ logEl.scrollTop=logEl.scrollHeight; };
@@ -238,7 +250,10 @@ Rules:
     const prev=openSection; openSection=currentSection();
     if(openSection!==prev){
       ctxEl.textContent=KB[openSection]?KB[openSection].title:'Keystone';
-      ctxEl.classList.remove('tick'); void ctxEl.offsetWidth; ctxEl.classList.add('tick');
+      /* restart the tick animation without a synchronous layout flush */
+      ctxEl.classList.remove('tick');
+      if(ctxEl.getAnimations){ ctxEl.classList.add('tick'); ctxEl.getAnimations().forEach(a=>{try{a.cancel();a.play();}catch(e){}}); }
+      else { void ctxEl.offsetWidth; ctxEl.classList.add('tick'); }
       if(logEl.querySelector('.kai-hello')) welcome();
     }
   }
@@ -248,7 +263,11 @@ Rules:
     if(!logEl.children.length) welcome();
     setTimeout(()=>input.focus(),160);
   }
-  function closePanel(){ panel.classList.remove('open'); fab.classList.remove('hide'); document.body.classList.remove('kai-open'); }
+  function closePanel(){
+    const hadFocus=panel.contains(document.activeElement);
+    panel.classList.remove('open'); fab.classList.remove('hide'); document.body.classList.remove('kai-open');
+    if(hadFocus) fab.focus();   // never strand keyboard focus inside the now-hidden dialog
+  }
   fab.onclick=openPanel;
   root.querySelector('#kaiX').onclick=closePanel;
   root.querySelector('#kaiReset').onclick=()=>{ if(!busy) welcome(); };
@@ -457,8 +476,8 @@ Reply ONLY a JSON object (no prose, no fences):\n{"challenge":"the single toughe
     const blocks=parseBlocks(text);
     let finished=false;
     const finalize=()=>{ if(finished) return; finished=true; clearInterval(iv); clearTimeout(to);
-      b.innerHTML=''; blocks.forEach(function(bl){ b.appendChild(renderBlock(bl,true)); }); done&&done(); toBottom(); };
-    if(reduceMotion||document.body.classList.contains('no-anim')){ finished=true; blocks.forEach(function(bl){ b.appendChild(renderBlock(bl,true)); }); done&&done(); return; }
+      b.innerHTML=''; blocks.forEach(function(bl){ b.appendChild(renderBlock(bl,true)); }); srSay(plain(text)); done&&done(); toBottom(); };
+    if(reduceMotion||document.body.classList.contains('no-anim')){ finished=true; blocks.forEach(function(bl){ b.appendChild(renderBlock(bl,true)); }); srSay(plain(text)); done&&done(); return; }
     const ops=[]; let total=0;
     const pushWords=t=>{ inlineSegs(t).forEach(seg=>{ String(seg.text).split(/(\s+)/).forEach(w=>{ if(!w) return; if(/^\s+$/.test(w)){ ops.push({op:'sp'}); } else { ops.push({op:'w',text:w,cls:seg.cls}); total+=w.length; } }); }); };
     blocks.forEach(bl=>{
@@ -505,16 +524,36 @@ Reply ONLY a JSON object (no prose, no fences):\n{"challenge":"the single toughe
   function decorate(node,meta,secId,answerText,evidence,followups,conf,basis){
     const body=node.querySelector('.kai-body');
     const row=document.createElement('div'); row.className='kai-meta';
-    let html='';
+    /* NB: everything here is built with DOM nodes + textContent \u2014 model-derived
+       values (evidence, intent, score) are never concatenated into innerHTML. */
+    let certEv=null;
     if(evidence&&evidence.length){
-      html+='<span class="kai-cert" title="Red-teamed and certified against: '+evidence.join(', ').replace(/"/g,'&quot;')+'">\u25c6 gate-certified</span>';
+      const cert=document.createElement('button'); cert.type='button'; cert.className='kai-cert';
+      cert.setAttribute('aria-expanded','false'); cert.textContent='\u25c6 gate-certified';
+      certEv=document.createElement('div'); certEv.className='kai-evid';
+      cert.onclick=function(){
+        const open=cert.getAttribute('aria-expanded')==='true';
+        cert.setAttribute('aria-expanded',open?'false':'true');
+        certEv.classList.toggle('show',!open);
+        if(!open && !certEv.childElementCount){
+          const l=document.createElement('div'); l.className='kai-ev-l'; l.textContent='Red-teamed and certified against:'; certEv.appendChild(l);
+          evidence.forEach(function(x){ const r=document.createElement('div'); r.className='kai-ev-row'; const t=document.createElement('span'); t.textContent=x; r.appendChild(t); certEv.appendChild(r); });
+        }
+      };
+      row.appendChild(cert);
     }else{
-      html+='<span class="kai-meta-t kai-meta-dim">grounded</span>';
+      const g=document.createElement('span'); g.className='kai-meta-t kai-meta-dim'; g.textContent='grounded'; row.appendChild(g);
     }
-    if(meta&&meta.score!=null){
-      html+='<span class="kai-conf" title="'+String(meta.intent||'').replace(/"/g,'&quot;')+'"><i style="--p:'+Math.max(6,Math.min(100,meta.score))+'%"></i></span><span class="kai-meta-t">'+meta.score+'%</span>';
+    const sc=Math.max(0,Math.min(100,parseFloat(meta&&meta.score)));   // coerce+clamp: never trust a model-supplied score in the DOM
+    if(Number.isFinite(sc)){
+      const conf=document.createElement('span'); conf.className='kai-conf'; conf.setAttribute('aria-hidden','true');
+      const bar=document.createElement('i'); bar.style.setProperty('--p',Math.max(6,sc)+'%'); conf.appendChild(bar);
+      const st=document.createElement('span'); st.className='kai-meta-t'; st.textContent=sc+'%';
+      const intent=meta&&meta.intent?String(meta.intent):'';
+      if(intent){ st.setAttribute('aria-label',sc+'% intent confidence \u2014 routed: '+intent); st.title=intent; }
+      row.appendChild(conf); row.appendChild(st);
     }
-    row.innerHTML=html;
+    if(certEv) body.appendChild(certEv);
     if(secId&&KB[secId]){
       const j=document.createElement('button'); j.className='kai-jump'; j.textContent=KB[secId].title+' \u2197';
       j.title='Jump to this section';
@@ -650,6 +689,7 @@ Reply ONLY a JSON object (no prose, no fences):\n{"challenge":"the single toughe
   function renderClarify(obj,originalQ,sec){
     const node=add('bot','','kai-wide');
     node.querySelector('.kai-bubble').textContent='Before I answer \u2014 let me make sure I read you right.';
+    srSay('Before I answer, a quick clarification'+(obj.intent?': '+obj.intent:'')+'.');
     const body=node.querySelector('.kai-body');
     const wrap=document.createElement('div'); wrap.className='kai-clar'; body.appendChild(wrap);
     if(obj.intent){ const g=document.createElement('div'); g.className='kai-clar-guess'; g.textContent='My read: '+obj.intent; wrap.appendChild(g); }
@@ -692,6 +732,7 @@ Reply ONLY a JSON object (no prose, no fences):\n{"challenge":"the single toughe
     });
     card.appendChild(lab); card.appendChild(reason); card.appendChild(scope); card.appendChild(opts);
     body.appendChild(card);
+    srSay(lab.textContent+'. '+reason.textContent);
     history.push({role:'assistant',content:'[gate '+intent.policy+'] '+(intent.reason||'out of scope')});
     toBottom();
   }
@@ -700,7 +741,7 @@ Reply ONLY a JSON object (no prose, no fences):\n{"challenge":"the single toughe
     const q=input.value.trim(); if(!q||busy) return;
     const hello=logEl.querySelector('.kai-hello'); if(hello) hello.remove();
     input.value=''; add('user',q); history.push({role:'user',content:q});
-    busy=true; sendBtn.disabled=true; input.placeholder='\u2026';
+    busy=true; sendBtn.disabled=true; input.placeholder='\u2026'; srSay('Keystone is answering\u2026');
     const sec=openSection, title=KB[sec]?KB[sec].title:'Keystone';
     if(!window.claude||!window.claude.complete){
       staticAnswer(q,sec);

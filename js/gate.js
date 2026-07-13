@@ -99,14 +99,14 @@
           </div>
           <div class="pp-badge">Certified</div>
         </div>
-        <div class="pp-grid">
+        <dl class="pp-grid">
           <div><dt>Agent</dt><dd>${agent}</dd></div>
           <div><dt>Class</dt><dd>Regulated · production-eligible</dd></div>
           <div><dt>Passport No.</dt><dd class="mono">${no}</dd></div>
           <div><dt>Issued</dt><dd>${date}</dd></div>
           <div><dt>Gate</dt><dd>Keystone Gate v1</dd></div>
           <div><dt>Independence</dt><dd>Cleared</dd></div>
-        </div>
+        </dl>
         <div class="pp-stamps">${stamps}</div>
         <div class="pp-hash" aria-hidden="true">${cells}</div>
         <button class="pp-tracebtn" id="ppTraceBtn" type="button" aria-expanded="false" aria-controls="ppTraceBody">view evidence trace ▸</button>

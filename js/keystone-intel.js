@@ -114,11 +114,15 @@
       })(performance.now());
       setTimeout(() => { if(!done) fin(); }, dur + 500);
     }
+    const SEV = { ok: 'ok', warn: 'warning', block: 'blocked' };
     function sigRow(s, animate){
       const d = document.createElement('div');
       d.className = 'intel-sig' + (animate ? ' pre' : '');
       d.innerHTML = '<i class="sd"></i><span class="ss"></span><span class="sm"></span><span class="st2"></span>';
-      d.querySelector('.sd').classList.add(s[0]);
+      const dot = d.querySelector('.sd');
+      dot.classList.add(s[0]);
+      dot.setAttribute('role', 'img');                 // severity is otherwise conveyed by colour alone
+      dot.setAttribute('aria-label', SEV[s[0]] || s[0]);
       d.querySelector('.ss').textContent = s[1];
       d.querySelector('.sm').textContent = s[2];
       d.querySelector('.st2').textContent = s[3] || 'now';

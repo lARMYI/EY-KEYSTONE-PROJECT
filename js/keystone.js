@@ -10,20 +10,25 @@ const C={gold:'#E9B84A',blue:'#5B97FF',teal:'#37D6B2',red:'#FF6B6B',violet:'#B49
      may never fire, so content (incl. JS-driven counters) would be
      invisible. Detect that and force everything to its end-state. */
   (function animHealth(){
-    setTimeout(()=>{
-      const t=document.timeline.currentTime;
-      if(typeof t==='number'&&t>0) return; // healthy
+    const forceEnd=()=>{
       document.body.classList.add('no-anim');
       document.querySelectorAll('.reveal').forEach(e=>e.classList.add('in'));
       document.querySelectorAll('.nc .v,.a3 .v').forEach(v=>{
         if(v.dataset.target&&!v.textContent) v.textContent=(v.dataset.prefix||'')+v.dataset.target+(v.dataset.suffix||'');
       });
+    };
+    const tl=document.timeline;
+    if(!tl){ forceEnd(); return; }   // no Web Animations timeline (very old engine): snap to end-state, don't throw
+    setTimeout(()=>{
+      const t=tl.currentTime;
+      if(typeof t==='number'&&t>0) return; // healthy
+      forceEnd();
     },1400);
     /* recovery: if the document timeline starts advancing again (tab un-throttled),
        drop the no-anim fallback so transitions and streaming come back */
-    let _tlLast=document.timeline.currentTime||0;
+    let _tlLast=tl.currentTime||0;
     setInterval(()=>{
-      const t=document.timeline.currentTime||0;
+      const t=tl.currentTime||0;
       if(t>_tlLast && document.body.classList.contains('no-anim')) document.body.classList.remove('no-anim');
       _tlLast=t;
     },2000);
@@ -66,12 +71,20 @@ const C={gold:'#E9B84A',blue:'#5B97FF',teal:'#37D6B2',red:'#FF6B6B',violet:'#B49
     const cv=document.getElementById('heroFx'); if(!cv||reduce) return;
     const ctx=cv.getContext('2d'); const dpr=Math.min(devicePixelRatio||1,2);
     let w=0,h=0,parts=[],raf=0,vis=true;
+    /* pre-render the glow into a sprite ONCE, then blit it per particle — avoids
+       ctx.shadowBlur, a per-fill Gaussian blur and the priciest canvas-2D path,
+       in the hero's most contended frame window */
+    const SP=64, sprite=document.createElement('canvas'); sprite.width=sprite.height=SP;
+    (function(){const sx=sprite.getContext('2d');const g=sx.createRadialGradient(SP/2,SP/2,0,SP/2,SP/2,SP/2);
+      g.addColorStop(0,'rgba(233,184,74,1)');g.addColorStop(.35,'rgba(233,184,74,.55)');g.addColorStop(1,'rgba(233,184,74,0)');
+      sx.fillStyle=g;sx.fillRect(0,0,SP,SP);})();
     function resize(){const r=cv.getBoundingClientRect();w=cv.width=Math.max(1,r.width*dpr);h=cv.height=Math.max(1,r.height*dpr);}
     function seed(){const n=Math.round(Math.min(56,w/dpr/26));parts=[];for(let i=0;i<n;i++)parts.push({x:Math.random()*w,y:Math.random()*h,r:(Math.random()*1.6+.4)*dpr,v:(Math.random()*.18+.05)*dpr,a:Math.random()*.5+.12,tw:Math.random()*Math.PI*2});}
-    function draw(){ctx.clearRect(0,0,w,h);for(const p of parts){p.y-=p.v;p.tw+=.02;if(p.y<-6){p.y=h+6;p.x=Math.random()*w;}const fl=p.a*(0.6+0.4*Math.sin(p.tw));ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fillStyle='rgba(233,184,74,'+fl.toFixed(3)+')';ctx.shadowBlur=6*dpr;ctx.shadowColor='rgba(233,184,74,.6)';ctx.fill();}ctx.shadowBlur=0;raf=requestAnimationFrame(draw);}
+    function draw(){ctx.clearRect(0,0,w,h);for(const p of parts){p.y-=p.v;p.tw+=.02;if(p.y<-6){p.y=h+6;p.x=Math.random()*w;}const fl=p.a*(0.6+0.4*Math.sin(p.tw));const d=p.r*7;ctx.globalAlpha=Math.min(1,fl*1.6);ctx.drawImage(sprite,p.x-d/2,p.y-d/2,d,d);}ctx.globalAlpha=1;raf=requestAnimationFrame(draw);}
     resize();seed();draw();
-    addEventListener('resize',()=>{cancelAnimationFrame(raf);resize();seed();draw();},{passive:true});
-    new IntersectionObserver(es=>{es.forEach(e=>{vis=e.isIntersecting;if(vis){if(!raf)raf=requestAnimationFrame(draw);}else{cancelAnimationFrame(raf);raf=0;}});}).observe(cv);
+    // don't restart the loop if the hero is currently scrolled off-screen
+    addEventListener('resize',()=>{cancelAnimationFrame(raf);raf=0;resize();seed();if(vis)draw();},{passive:true});
+    try{ new IntersectionObserver(es=>{es.forEach(e=>{vis=e.isIntersecting;if(vis){if(!raf)raf=requestAnimationFrame(draw);}else{cancelAnimationFrame(raf);raf=0;}});}).observe(cv); }catch(e){}
   })();
 
   /* ===== CURSOR SPOTLIGHT + PARALLAX ===== */
@@ -165,8 +178,9 @@ const C={gold:'#E9B84A',blue:'#5B97FF',teal:'#37D6B2',red:'#FF6B6B',violet:'#B49
   /* deterministic: the step whose centre is nearest the viewport middle is active,
      so the number, ring rotation, lit node and text can never disagree */
   const fwSteps=[...document.querySelectorAll('.fwstep')];
-  let fwCur=-1;
+  let fwCur=-1, fwActive=true, rafFw=0;
   function fwUpdate(){
+    if(!fwActive) return;                       // gated to the #flywheel section; no rect reads elsewhere
     const mid=innerHeight*0.5; let best=0,bestD=Infinity;
     for(let i=0;i<fwSteps.length;i++){
       const r=fwSteps[i].getBoundingClientRect();
@@ -175,13 +189,18 @@ const C={gold:'#E9B84A',blue:'#5B97FF',teal:'#37D6B2',red:'#FF6B6B',violet:'#B49
     }
     if(best!==fwCur){fwCur=best;setFW(best);}
   }
-  addEventListener('scroll',fwUpdate,{passive:true});
-  addEventListener('resize',fwUpdate,{passive:true});
+  const fwSched=()=>{ if(!rafFw) rafFw=requestAnimationFrame(()=>{ rafFw=0; fwUpdate(); }); };  // batch reads/writes out of the scroll task
+  addEventListener('scroll',fwSched,{passive:true});
+  addEventListener('resize',fwSched,{passive:true});
+  const fwsecEl=document.getElementById('flywheel');
+  if(fwsecEl){ try{ new IntersectionObserver(es=>{ fwActive=es[0].isIntersecting; if(fwActive) fwSched(); },{rootMargin:'50% 0px'}).observe(fwsecEl); }catch(e){} }
   fwUpdate();
 
   /* REVEAL */
-  const rObs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rObs.unobserve(e.target);}});},{threshold:.15});
-  document.querySelectorAll('.reveal').forEach(el=>rObs.observe(el));
+  let rObs=null;
+  try{ rObs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rObs.unobserve(e.target);}});},{threshold:.15}); }catch(e){}
+  if(rObs){ document.querySelectorAll('.reveal').forEach(el=>rObs.observe(el)); }
+  else { document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in')); }   // no IO → show everything rather than blank the page
 
   /* COUNTERS */
   function count(el){const tg=parseFloat(el.dataset.target),pre=el.dataset.prefix||'',suf=el.dataset.suffix||'';
@@ -191,16 +210,25 @@ const C={gold:'#E9B84A',blue:'#5B97FF',teal:'#37D6B2',red:'#FF6B6B',violet:'#B49
     function step(now){let p=Math.min((now-st)/dur,1);p=1-Math.pow(1-p,3);let v=tg*p;v=Number.isInteger(tg)?Math.round(v):Math.round(v*10)/10;el.textContent=pre+v+suf;if(p<1)requestAnimationFrame(step);else{done=true;final();}}
     requestAnimationFrame(step);
     setTimeout(()=>{if(!done)final();},2200);}
-  const cObs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){count(e.target);cObs.unobserve(e.target);}});},{threshold:.5});
-  document.querySelectorAll('.nc .v').forEach(v=>cObs.observe(v));
+  let cObs=null;
+  try{ cObs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){count(e.target);cObs.unobserve(e.target);}});},{threshold:.5}); }catch(e){}
+  if(cObs){ document.querySelectorAll('.nc .v').forEach(v=>cObs.observe(v)); }
+  else { document.querySelectorAll('.nc .v').forEach(v=>count(v)); }
 
   /* SCROLL: progress + nav */
   const prog=document.getElementById('progress'),nav=document.getElementById('nav');
-  function onScroll(){const h=document.documentElement.scrollHeight-innerHeight;prog.style.width=(scrollY/h*100)+'%';nav.classList.toggle('scrolled',scrollY>40);}
-  addEventListener('scroll',onScroll,{passive:true});onScroll();
+  let scrollDenom=Math.max(1,document.documentElement.scrollHeight-innerHeight);
+  const recalcDenom=()=>{ scrollDenom=Math.max(1,document.documentElement.scrollHeight-innerHeight); };
+  function onScroll(){prog.style.width=(scrollY/scrollDenom*100)+'%';nav.classList.toggle('scrolled',scrollY>40);}
+  addEventListener('scroll',onScroll,{passive:true});
+  addEventListener('resize',recalcDenom,{passive:true});
+  // page height changes at runtime (lens notes, disclosures) — keep the denominator honest without reading layout every scroll
+  try{ new ResizeObserver(recalcDenom).observe(document.documentElement); }catch(e){}
+  recalcDenom(); onScroll();
 
-  /* MAGNETIC BUTTONS */
-  if(!reduce){document.querySelectorAll('.magnetic').forEach(b=>{
+  /* MAGNETIC BUTTONS (fine pointer only — a tap's synthesized mousemove would
+     otherwise leave touch buttons displaced until the next tap elsewhere) */
+  if(finePointer && !reduce){document.querySelectorAll('.magnetic').forEach(b=>{
     b.addEventListener('mousemove',e=>{const r=b.getBoundingClientRect();b.style.transform='translate('+((e.clientX-r.left-r.width/2)*.25)+'px,'+((e.clientY-r.top-r.height/2)*.35)+'px)';});
     b.addEventListener('mouseleave',()=>b.style.transform='');});}
 
@@ -213,4 +241,15 @@ const C={gold:'#E9B84A',blue:'#5B97FF',teal:'#37D6B2',red:'#FF6B6B',violet:'#B49
     el.addEventListener('click',t);
     el.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); t(); } });
   });
+
+  /* RESPONSIVE NAV: disclosure menu below 780px (the section links used to just vanish) */
+  (function navMenu(){
+    const navEl=document.getElementById('nav'), toggle=document.getElementById('navToggle'), links=document.getElementById('navLinks');
+    if(!navEl||!toggle||!links) return;
+    const setOpen=o=>{ navEl.classList.toggle('nav-open',o); toggle.setAttribute('aria-expanded',o?'true':'false'); toggle.setAttribute('aria-label',o?'Close section menu':'Open section menu'); };
+    toggle.addEventListener('click',()=> setOpen(!navEl.classList.contains('nav-open')));
+    links.addEventListener('click',e=>{ if(e.target.closest('a')) setOpen(false); });   // close after picking a section
+    addEventListener('keydown',e=>{ if(e.key==='Escape'&&navEl.classList.contains('nav-open')){ setOpen(false); toggle.focus(); } });
+    addEventListener('pointerdown',e=>{ if(navEl.classList.contains('nav-open')&&!navEl.contains(e.target)) setOpen(false); },{passive:true});
+  })();
 })();

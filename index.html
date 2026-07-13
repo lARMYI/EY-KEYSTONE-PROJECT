@@ -9,15 +9,17 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="The Keystone Lab — a working concept for EY">
 <meta property="og:description" content="Give us 90 days. We will prove whether EY can own the governed systems layer for the agentic era. Independent working concept for leadership review.">
-<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="The Keystone Lab — a working concept for EY">
 <meta name="twitter:description" content="Give us 90 days. We will prove whether EY can own the governed systems layer for the agentic era. Independent working concept for leadership review.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%23070A10'/%3E%3Cpath%20d='M9%208h14l-3%2016h-8z'%20fill='%23E9B84A'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <link rel="stylesheet" href="css/keystone.css">
-<noscript><style>
+<noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
   /* no JS: force-reveal everything and finish the simulations' end states;
      hide hints for interactions that need JS */
   .reveal{opacity:1;transform:none}
@@ -41,7 +43,8 @@
 
 <nav id="nav">
   <div class="logo"><span class="kb"></span><b>EY KEYSTONE</b></div>
-  <div class="links">
+  <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open section menu"><span></span><span></span><span></span></button>
+  <div class="links" id="navLinks">
     <a href="#whynow">Why now</a>
     <a href="#keystone">What Keystone is</a>
     <a href="#lighthouse">First proof</a>
@@ -81,7 +84,7 @@
   <h2 class="h2 reveal">In the agentic era, EY either owns the governed systems layer or runs downstream of someone else's.</h2>
   <p class="lead reveal">Big tech owns the models. Clouds own the compute. Startups own the speed. EY owns trust, domain complexity, regulated access, and transformation credibility, but that advantage only holds if EY builds the system layer between frontier AI and enterprise adoption. That layer is Keystone.</p>
   <div class="whynow reveal mt-24">
-    <p>EY already has the ingredients: a firm-defining bet on EY.ai, AI embedded across proprietary platforms like EY Fabric, which EY reports serves <b>60,000 clients and 1.5M+ unique users</b><sup class="fn"><a href="#src-1">1</a></sup> and powers 80% of the firm. It has shipped the EY.ai Agentic Platform with NVIDIA,<sup class="fn"><a href="#src-2">2</a></sup> EY.ai enterprise private with Dell and NVIDIA,<sup class="fn"><a href="#src-3">3</a></sup> and risk solutions on the agentic platform.<sup class="fn"><a href="#src-4">4</a></sup> <b>The ingredients exist. What is missing is the governed systems lab that turns frontier capability into regulated enterprise infrastructure.</b></p>
+    <p>EY already has the ingredients: a firm-defining bet on EY.ai, AI embedded across proprietary platforms like EY Fabric, which EY reports serves <b>60,000 clients and 1.5M+ unique users</b><sup class="fn"><a href="#src-1">1</a></sup>. It has shipped the EY.ai Agentic Platform with NVIDIA,<sup class="fn"><a href="#src-2">2</a></sup> EY.ai enterprise private with Dell and NVIDIA,<sup class="fn"><a href="#src-3">3</a></sup> and risk solutions on the agentic platform.<sup class="fn"><a href="#src-4">4</a></sup> <b>The ingredients exist. What is missing is the governed systems lab that turns frontier capability into regulated enterprise infrastructure.</b></p>
     <div class="have">
       <span class="haveitem">EY.ai · launched &amp; live</span>
       <span class="haveitem">EY Fabric · 60k clients · 1.5M users</span>
@@ -94,8 +97,8 @@
   <p class="lead reveal mt-2">EY leads where it counts most: 150 tax agents now support 80,000 EY tax professionals,<sup class="fn"><a href="#src-2">2</a></sup> and EY.ai for Risk is live.<sup class="fn"><a href="#src-4">4</a></sup> But rivals are racing to build the connective infrastructure around their agents, and that is the gap.</p>
   <div class="peers reveal">
     <div class="peer pc-teal"><div class="pf">Deloitte</div><div class="pb">A Global AI Simulation Center of Excellence: digital twins, scenario modeling, and multi-agent systems to test process, people, and strategy.<sup class="fn"><a href="#src-5">5</a></sup></div><div class="pgap">Gap it exposes · <b>EY has no comparable simulation and digital-twin lab</b></div></div>
-    <div class="peer pc-violet"><div class="pf">KPMG</div><div class="pb">A digital-teammate workforce framework: an agent lifecycle, new roles like orchestration engineer and AI governance specialist, and Trusted AI certification.<sup class="fn"><a href="#src-6">6</a></sup></div><div class="pgap">Gap it exposes · <b>EY has not framed the workforce transformation</b></div></div>
-    <div class="peer pc-blue"><div class="pf">Accenture</div><div class="pb">A broad suite of industry-specific AI accelerators and an enterprise AI navigator to help clients choose architectures and responsible-AI practices.<sup class="fn"><a href="#src-7">7</a></sup></div><div class="pgap">Gap it exposes · <b>EY's agents concentrate in a few practices</b></div></div>
+    <div class="peer pc-violet"><div class="pf">KPMG</div><div class="pb">A digital-teammate workforce framework: an agent lifecycle and new roles like orchestration engineer and AI governance &amp; risk specialist,<sup class="fn"><a href="#src-9">9</a></sup> alongside its Trusted AI framework.<sup class="fn"><a href="#src-6">6</a></sup></div><div class="pgap">Gap it exposes · <b>EY has not framed the workforce transformation</b></div></div>
+    <div class="peer pc-blue"><div class="pf">Accenture</div><div class="pb">A broad suite of industry-specific AI accelerators<sup class="fn"><a href="#src-7">7</a></sup> and AI Navigator for Enterprise, to help clients choose architectures and models responsibly.<sup class="fn"><a href="#src-10">10</a></sup></div><div class="pgap">Gap it exposes · <b>EY's agents concentrate in a few practices</b></div></div>
   </div>
   <div class="principle reveal mt-14">
     <div class="pl">Where Keystone closes it</div>
@@ -119,22 +122,22 @@
   <p class="lead reveal">Strategy is choosing what happens by default. Play the same decision forward under each posture — <b>own</b> the governed systems layer, <b>rent</b> it from whoever builds it, or <b>wait</b> for the market to settle — and the cost of each future stops being rhetorical. It becomes checkable at nine, eighteen, and thirty-six months.</p>
   <div class="futures mt-30">
     <div class="future fu-own reveal">
-      <div class="fu-head"><span class="fu-k">Future 01</span><h4>Own the layer</h4><div class="fu-stance">The Keystone posture · build the governed substrate</div></div>
+      <div class="fu-head"><span class="fu-k">Future 01</span><h3>Own the layer</h3><div class="fu-stance">The Keystone posture · build the governed substrate</div></div>
       <div class="fu-line"><span class="fu-t">+9 mo</span><p>The Gate v1 is certifying agents in a live banking sandbox. The first measured baselines exist — value is a number, not a narrative.</p></div>
       <div class="fu-line"><span class="fu-t">+18 mo</span><p>Reusable primitives cut build time engagement over engagement. The proving ground pulls a second regulated industry in on the strength of the first.</p></div>
       <div class="fu-line"><span class="fu-t">+36 mo</span><p>The governed substrate underpins EY.ai delivery across regulated industries — the layer other platforms integrate <em>with</em>, on EY's terms.</p></div>
       <div class="fu-end">Terminal state · <b>EY sets the terms of trust for agentic AI</b></div>
     </div>
     <div class="future fu-rent reveal d1">
-      <div class="fu-head"><span class="fu-k">Future 02</span><h4>Rent the layer</h4><div class="fu-stance">Ship agents on whoever's platform wins</div></div>
+      <div class="fu-head"><span class="fu-k">Future 02</span><h3>Rent the layer</h3><div class="fu-stance">Ship agents on whoever's platform wins</div></div>
       <div class="fu-line"><span class="fu-t">+9 mo</span><p>Point agents ship quickly on partner platforms. Governance is whatever the platform provides — inherited, not owned.</p></div>
       <div class="fu-line"><span class="fu-t">+18 mo</span><p>Every engagement rebuilds controls inside someone else's runtime. The evidence lives in their ledger, priced into their margin.</p></div>
       <div class="fu-line"><span class="fu-t">+36 mo</span><p>The systems layer consolidates around two or three platforms. EY integrates on their terms and competes on rate card, not on trust infrastructure.</p></div>
       <div class="fu-end">Terminal state · <b>EY delivers on rented ground</b></div>
     </div>
     <div class="future fu-wait reveal d2">
-      <div class="fu-head"><span class="fu-k">Future 03</span><h4>Wait and see</h4><div class="fu-stance">Let the market settle first</div></div>
-      <div class="fu-line"><span class="fu-t">+9 mo</span><p>The peers keep shipping — the simulation center, the workforce framework, the accelerator suite<sup class="fn"><a href="#src-5">5</a></sup><sup class="fn"><a href="#src-6">6</a></sup><sup class="fn"><a href="#src-7">7</a></sup> — each move a fragment of the layer EY is deferring.</p></div>
+      <div class="fu-head"><span class="fu-k">Future 03</span><h3>Wait and see</h3><div class="fu-stance">Let the market settle first</div></div>
+      <div class="fu-line"><span class="fu-t">+9 mo</span><p>The peers keep shipping — the simulation center, the workforce framework, the accelerator suite<sup class="fn"><a href="#src-5">5</a></sup><sup class="fn"><a href="#src-9">9</a></sup><sup class="fn"><a href="#src-7">7</a></sup> — each move a fragment of the layer EY is deferring.</p></div>
       <div class="fu-line"><span class="fu-t">+18 mo</span><p>The operators and engineers who wanted to build the layer have gone where it is being built. The option gets more expensive to exercise.</p></div>
       <div class="fu-line"><span class="fu-t">+36 mo</span><p>Both other futures are still available — at a premium, on someone else's schedule. Waiting was never a third option; it was renting, later.</p></div>
       <div class="fu-end">Terminal state · <b>choosing "rent," later, at a higher price</b></div>
@@ -184,7 +187,7 @@
     <div class="lnode"><div class="ln2">06</div><div class="lt">Measure</div><div class="ld">Prove the change against a baseline, at the Gate</div></div>
     <div class="lnode"><div class="ln2">07</div><div class="lt">Redeploy</div><div class="ld">Componentize it and carry it to the next team, faster</div></div>
   </div>
-  <div class="coinv reveal mt-26"><div class="l">The training engine</div><h4>People are reskilled to supervise agents, not replaced by them.</h4><p>Every engagement upskills the teams it touches: EY professionals and client teams learn to design, govern, and operate agents. The pyramid of manual juniors becomes a diamond of agent supervisors. Training is not a side effect of Keystone. It is how the capability spreads, sticks, and compounds across the firm's 300k+ professionals.</p></div>
+  <div class="coinv reveal mt-26"><div class="l">The training engine</div><h3>People are reskilled to supervise agents, not replaced by them.</h3><p>Every engagement upskills the teams it touches: EY professionals and client teams learn to design, govern, and operate agents. The pyramid of manual juniors becomes a diamond of agent supervisors. Training is not a side effect of Keystone. It is how the capability spreads, sticks, and compounds across the firm's 300k+ professionals.</p></div>
   <h3 class="reveal subhead">EY's first proving ground is EY.</h3>
   <p class="lead reveal lead-sm mt-2">Before Keystone changes a single client, it changes EY. The firm becomes the first user of its own governed agentic systems — <b>Keystone turns trust into infrastructure</b>: policies become rules, controls become runtime checks, quality standards become evaluations. That is what earns the right to sell the transformation, and what lets EY look any regulated client in the eye and say: we did this to ourselves first.</p>
   <div class="taf reveal mt-24">
@@ -366,11 +369,11 @@
       <div class="intel-kpi"><div class="ik-v" data-target="4" data-suffix="/6">4/6</div><div class="ik-c">Day-90 gates green</div><svg class="ik-spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"></svg></div>
     </div>
     <div class="intel-feed" id="intelFeed" role="group" aria-label="Simulated intelligence signals">
-      <div class="intel-sig"><i class="sd ok"></i><span class="ss">gate</span><span class="sm">2 agents certified this run · passports issued</span><span class="st2">now</span></div>
-      <div class="intel-sig"><i class="sd ok"></i><span class="ss">baseline</span><span class="sm">third-party review cycle time −47% vs manual</span><span class="st2">2m</span></div>
-      <div class="intel-sig"><i class="sd warn"></i><span class="ss">pipeline</span><span class="sm">target state: 2 lighthouse banks in named conversations · 1 LOI</span><span class="st2">9m</span></div>
-      <div class="intel-sig"><i class="sd ok"></i><span class="ss">evidence</span><span class="sm">14,902 records sealed · lineage 100%</span><span class="st2">12m</span></div>
-      <div class="intel-sig"><i class="sd ok"></i><span class="ss">decision</span><span class="sm">target state: 4 of 6 day-90 gates green · 2 open with owners</span><span class="st2">15m</span></div>
+      <div class="intel-sig"><i class="sd ok" role="img" aria-label="ok"></i><span class="ss">gate</span><span class="sm">2 agents certified this run · passports issued</span><span class="st2">now</span></div>
+      <div class="intel-sig"><i class="sd ok" role="img" aria-label="ok"></i><span class="ss">baseline</span><span class="sm">third-party review cycle time −47% vs manual</span><span class="st2">2m</span></div>
+      <div class="intel-sig"><i class="sd warn" role="img" aria-label="warning"></i><span class="ss">pipeline</span><span class="sm">target state: 2 lighthouse banks in named conversations · 1 LOI</span><span class="st2">9m</span></div>
+      <div class="intel-sig"><i class="sd ok" role="img" aria-label="ok"></i><span class="ss">evidence</span><span class="sm">14,902 records sealed · lineage 100%</span><span class="st2">12m</span></div>
+      <div class="intel-sig"><i class="sd ok" role="img" aria-label="ok"></i><span class="ss">decision</span><span class="sm">target state: 4 of 6 day-90 gates green · 2 open with owners</span><span class="st2">15m</span></div>
     </div>
     <div class="intel-brief" id="intelBrief" aria-live="polite">
       <div class="ib-l">Decision brief · computed for this room</div>
@@ -452,21 +455,21 @@
   <p class="lead reveal">These three workflows are demonstrators of the deeper systems layer. Each has a named buyer, a real pain, and a measurable target. What they prove is the governed substrate underneath, and that is the asset that compounds.</p>
   <div class="lh mt-26">
     <div class="lhc reveal">
-      <h4>Third-party risk review agent</h4>
+      <h3>Third-party risk review agent</h3>
       <div class="who">Buyer · CRO / Procurement / Risk</div>
       <div class="m"><span class="k">Pain</span><span class="vv">Slow, manual vendor and TPRM reviews</span></div>
       <div class="m"><span class="k">Target value</span><span class="vv val">40–60% cycle-time reduction</span></div>
       <div class="m"><span class="k">Why EY wins</span><span class="vv">EY risk knowledge + the NVIDIA / EY.ai platform</span></div>
     </div>
     <div class="lhc reveal d1">
-      <h4>AI control testing &amp; evidence agent</h4>
+      <h3>AI control testing &amp; evidence agent</h3>
       <div class="who">Buyer · CISO / Audit / Risk</div>
       <div class="m"><span class="k">Pain</span><span class="vv">No scalable way to govern and test agents</span></div>
       <div class="m"><span class="k">Target value</span><span class="vv val">Faster evidence &amp; control validation</span></div>
       <div class="m"><span class="k">Why EY wins</span><span class="vv">EY trust and assurance heritage</span></div>
     </div>
     <div class="lhc reveal d2">
-      <h4>Agentic SOC / cyber-risk triage</h4>
+      <h3>Agentic SOC / cyber-risk triage</h3>
       <div class="who">Buyer · CISO / Cyber Ops</div>
       <div class="m"><span class="k">Pain</span><span class="vv">Alert overload, slow response latency</span></div>
       <div class="m"><span class="k">Target value</span><span class="vv val">Lower analyst load, faster triage</span></div>
@@ -502,9 +505,9 @@
   <h2 class="h2 reveal">A platform no one side could build alone.</h2>
   <p class="lead reveal">EY's edge is not compute or agent count. It is trust, independence discipline, regulated domain complexity, and live EY.ai momentum. Each side brings what the others lack, and the Lab is where they meet under one governance spine.</p>
   <div class="inputs">
-    <div class="inp reveal ic-gold"><div class="role">EY brings</div><h4>Domain &amp; Trust</h4><ul><li>300k+ professionals</li><li>Assurance &amp; governance heritage</li><li>Client relationships</li><li>The Keystone Gate</li></ul></div>
-    <div class="inp reveal ic-violet d12"><div class="role">Big Tech brings</div><h4>Frontier &amp; Compute</h4><ul><li>Compute &amp; frontier models</li><li>Hardware &amp; early access</li><li>Embedded engineers</li><li>Contributed R&amp;D</li></ul></div>
-    <div class="inp reveal ic-blue d24"><div class="role">Clients bring</div><h4>Demand &amp; Data</h4><ul><li>Real use cases</li><li>Governed proprietary data</li><li>Proving-ground demand</li><li>Reference deployments</li></ul></div>
+    <div class="inp reveal ic-gold"><div class="role">EY brings</div><h3>Domain &amp; Trust</h3><ul><li>300k+ professionals</li><li>Assurance &amp; governance heritage</li><li>Client relationships</li><li>The Keystone Gate</li></ul></div>
+    <div class="inp reveal ic-violet d12"><div class="role">Big Tech brings</div><h3>Frontier &amp; Compute</h3><ul><li>Compute &amp; frontier models</li><li>Hardware &amp; early access</li><li>Embedded engineers</li><li>Contributed R&amp;D</li></ul></div>
+    <div class="inp reveal ic-blue d24"><div class="role">Clients bring</div><h3>Demand &amp; Data</h3><ul><li>Real use cases</li><li>Governed proprietary data</li><li>Proving-ground demand</li><li>Reference deployments</li></ul></div>
   </div>
   <div class="flowdown reveal"><div class="pulse"></div></div>
   <div class="labbar reveal"><div class="lg">The Keystone Lab · governed by the Gate</div><h3>Frontier → Sandbox → Assembly → Gate → Graduation</h3><p>The three sides build governed agentic solutions together. Nothing leaves without clearing the Gate.</p></div>
@@ -517,7 +520,7 @@
   <h2 class="h2 h2-sm reveal">Built with the hyperscalers, not bought from them.</h2>
   <div class="marquee reveal"><div class="t"><b>NVIDIA</b>·<b>Microsoft</b>·<b>Dell</b>·<b>CrowdStrike</b>·<b>Anthropic</b>·<b>Google</b>·<b>OpenAI</b>·&nbsp;<b>NVIDIA</b>·<b>Microsoft</b>·<b>Dell</b>·<b>CrowdStrike</b>·<b>Anthropic</b>·<b>Google</b>·<b>OpenAI</b>·</div></div>
   <div class="pgrid" id="partners-grid"></div>
-  <div class="coinv reveal"><div class="l">The deal structure</div><h4>Co-build, not procurement.</h4><p>Partners contribute compute, embedded engineers, and early access to frontier models and hardware. EY contributes regulated-enterprise reference deployments, domain-governed blueprints, and co-go-to-market. <b>Big tech gets a trusted beachhead into banking and other regulated industries it cannot reach alone. EY gets frontier capability and embedded engineering it could not stand up at this speed on its own.</b></p></div>
+  <div class="coinv reveal"><div class="l">The deal structure</div><h3>Co-build, not procurement.</h3><p>Partners contribute compute, embedded engineers, and early access to frontier models and hardware. EY contributes regulated-enterprise reference deployments, domain-governed blueprints, and co-go-to-market. <b>Big tech gets a trusted beachhead into banking and other regulated industries it cannot reach alone. EY gets frontier capability and embedded engineering it could not stand up at this speed on its own.</b></p></div>
 </div></section>
 
 <!-- PART 4 · SUPPORTING — THE MARKET MODEL -->
@@ -673,13 +676,13 @@
   <div class="vs reveal mt-30">
     <div class="vscard out">
       <div class="vl">What most AI labs sell</div>
-      <h4>Products</h4>
+      <h3>Products</h3>
       <p>A basket of agents, each one a one-off build. If a given agent misses, that spend is gone. Binary, fragile, and hard to defend to a board.</p>
     </div>
     <div class="vsarrow">→</div>
     <div class="vscard in">
       <div class="vl">What Keystone sells</div>
-      <h4>Capability</h4>
+      <h3>Capability</h3>
       <p>The governed machine that builds repeatably: the Gate, the playbooks, the eval harness, the upskilled people. Apps, solutions, agents and modernized core systems are the output. The capability is the durable asset that compounds.</p>
     </div>
   </div>
@@ -729,6 +732,7 @@
 <!-- PART 7 · SUPPORTING — THE SHAPE OF IT -->
 <section class="sec" id="shape"><div class="wrap">
   <div class="kick reveal"><span class="num">07·C</span><span class="tag">The shape of it</span><span class="ln"></span></div>
+  <h2 class="sr-only">The shape of it</h2>
   <div class="nums mt-10">
     <div class="nc reveal"><div class="v" data-target="300" data-suffix="k+"></div><div class="c">Professionals on EY.ai today · EY public<sup class="fn"><a href="#src-8">8</a></sup></div></div>
     <div class="nc reveal d1"><div class="v" data-target="1.5" data-suffix="M"></div><div class="c">EY Fabric users today · EY public<sup class="fn"><a href="#src-1">1</a></sup></div></div>
@@ -752,6 +756,8 @@
     <li id="src-6"><span><a href="https://kpmg.com/xx/en/what-we-do/services/ai/trusted-ai-framework.html" target="_blank" rel="noopener noreferrer">KPMG Trusted AI framework: AI lifecycle governance, trust, assurance, monitoring, transparency, accountability</a> — KPMG</span><span class="st mk">Market signal</span></li>
     <li id="src-7"><span><a href="https://www.accenture.com/us-en/services/ai-data/ai-refinery" target="_blank" rel="noopener noreferrer">Accenture AI Refinery: preconfigured industry agent solutions and enterprise orchestration</a> — Accenture</span><span class="st mk">Market signal</span></li>
     <li id="src-8"><span><a href="https://www.ey.com/en_gl/insights/ai/building-an-enterprise-scale-agentic-ai-operating-system" target="_blank" rel="noopener noreferrer">EY on building an enterprise-scale agentic AI operating system; EY.ai EYQ deployed to 300,000+ professionals</a> — EY insights</span><span class="st ey">EY public</span></li>
+    <li id="src-9"><span><a href="https://kpmg.com/us/en/articles/2025/agents-change-new-organizational-roles-ai.html" target="_blank" rel="noopener noreferrer">KPMG "Agents of change": new organizational roles for the age of AI — digital teammates, orchestration engineer, AI governance and risk specialist</a> — KPMG, Dec 2025</span><span class="st mk">Market signal</span></li>
+    <li id="src-10"><span><a href="https://newsroom.accenture.com/news/2023/accenture-to-invest-3-billion-in-ai-to-accelerate-clients-reinvention" target="_blank" rel="noopener noreferrer">Accenture to invest US$3B in AI; launches AI Navigator for Enterprise to help clients choose architectures and models responsibly</a> — Accenture Newsroom, Jun 2023</span><span class="st mk">Market signal</span></li>
   </ol>
   <p class="lead lead-sm reveal mt-20">Anything not cited here — the Lab, the OS, the Gate, the proving grounds, the agent targets — is <b>Keystone-proposed</b>: authored strategy for EY leadership to evaluate, not an existing EY program.</p>
 </div></section>
@@ -800,8 +806,10 @@
   </ol>
   <p class="pb-foot">Independent working concept for EY leadership review · not an authorized EY publication. EY-public figures cited on the full page (ey.com newsroom); everything proposed here is labeled Keystone-proposed, not an EY commitment.</p>
 </section>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="js/keystone3d.js"></script>
+<!-- Local UX scripts load first so a slow/blocked CDN can never leave the page
+     blank (reveals, grids, lens, agent all depend on keystone.js). Three.js and
+     the 3D spine load last, integrity-checked; if the CDN fails, keystone3d.js's
+     WebGL guard leaves the SVG-arch fallback in place. -->
 <script src="js/keystone.js"></script>
 <script src="js/gate.js"></script>
 <script src="js/kos.js"></script>
@@ -809,5 +817,7 @@
 <script src="js/keystone-lens.js"></script>
 <script src="js/keystone-fx.js"></script>
 <script src="js/keystone-ai.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="js/keystone3d.js"></script>
 </body>
 </html>
