@@ -14,7 +14,7 @@ python3 -m http.server 8000
 # then open http://localhost:8000
 ```
 
-Or deploy as-is to GitHub Pages / Netlify / any static host (`index.html` is the entry point). The fonts (Fraunces / Hanken Grotesk / JetBrains Mono) are **self-hosted** in `fonts/`, so the page renders fully offline; the only external request is Three.js (r128) from cdnjs on the main page, and it falls back to a drawn SVG arch if that can't load.
+Or deploy as-is to GitHub Pages / Netlify / any static host (`index.html` is the entry point). Everything is **first-party** — the fonts are self-hosted in `fonts/` and Three.js (r128) is vendored in `vendor/` — so the site makes **no external requests** and renders fully offline. (If `vendor/three.min.js` is ever missing, the 3D keystone falls back to a drawn SVG arch.)
 
 ## What's on the page
 
@@ -46,6 +46,7 @@ quarters.html          supplement — the twelve-quarter development plan (Phase
 css/keystone.css       the full design system (tokens, atmosphere, components, chat)
 css/fonts.css          self-hosted @font-face (replaces the Google Fonts CDN)
 fonts/                 Fraunces / Hanken Grotesk / JetBrains Mono variable WOFF2 (latin)
+vendor/three.min.js    vendored Three.js r128 (MIT) — no CDN dependency
 _headers               security headers (CSP etc.) for Netlify / Cloudflare Pages
 js/keystone3d.js       WebGL keystone spine (Three.js r128, progressive enhancement)
 js/keystone.js         core: reveals, counters, flywheel, generated grids, health fallback
@@ -96,17 +97,18 @@ To wire a real backend, define the same contract **before** `js/keystone-ai.js` 
 
 Keep the model call server-side — never ship API keys in this page. There are no secrets in this repo: the only model path is the `window.claude.complete({messages})` contract, which an integrator wires to a same-origin endpoint (`connect-src 'self'`). No API key, token, or `Authorization` header is ever shipped to the browser.
 
-## Security headers (CSP + SRI)
+## Security headers (CSP) & a fully first-party site
 
-Defense-in-depth against injection and CDN compromise, verified with a headless-browser pass (0 CSP violations, 0 page errors, all interactions intact):
+Defense-in-depth against injection, verified with a headless-browser pass (0 CSP violations, 0 page errors, no external requests, all interactions intact):
 
+- **Everything is first-party.** Fonts are self-hosted (`fonts/`) and Three.js r128 is vendored (`vendor/three.min.js`, MIT), so the site makes **no external network requests** and the CSP is a clean `default-src 'self'` with **no third-party origins at all** — nothing to pin, nothing to be compromised remotely.
 - **Content-Security-Policy** ships two ways so it applies on every host:
   - a `<meta http-equiv="Content-Security-Policy">` tag in every HTML page (works even on GitHub Pages, which can't set headers);
   - a real header in **`_headers`** (Netlify / Cloudflare Pages) that additionally carries the header-only directives (`frame-ancestors`, `X-Frame-Options`, `Referrer-Policy`, `X-Content-Type-Options`, `Permissions-Policy`, `COOP`).
-  - Policy: `default-src 'self'`; `script-src 'self' https://cdnjs.cloudflare.com` (`'self'` only on the supplement pages — they don't load three.js); `style-src 'self' 'unsafe-inline'` (the site uses inline `style=` attributes); `font-src 'self'` and `img-src 'self' data:` (fonts are self-hosted; the CSS grain is a data-URI SVG); `connect-src 'self'`; `object-src 'none'`; `base-uri 'self'`. No inline `<script>`, no `'unsafe-eval'`, and no third-party origins except the cdnjs three.js on the index page.
+  - Policy (identical on every page): `default-src 'self'`; `script-src 'self'` (no inline `<script>`, no `'unsafe-eval'`); `style-src 'self' 'unsafe-inline'` (the site uses inline `style=` attributes); `font-src 'self'`; `img-src 'self' data:` (the CSS grain is a data-URI SVG); `connect-src 'self'`; `object-src 'none'`; `base-uri 'self'`.
   - **Keep the `<meta>` CSP and the `_headers` CSP in sync** when editing.
-- **Subresource Integrity (SRI)** pins **three.js r128** on cdnjs (`integrity="sha512-…"` + `crossorigin="anonymous"`) so a tampered CDN file is refused — and if it ever is, the 3D keystone falls back silently to the SVG arch, so the page never breaks. The hash is the published cdnjs r128 value; re-verify at deploy with [srihash.org](https://www.srihash.org/) if you bump the version.
-- **Fonts are self-hosted (no SRI needed):** the Google Fonts CDN dependency was removed. The Fraunces / Hanken Grotesk / JetBrains Mono variable WOFF2s (latin subset) live in `fonts/`, declared by `css/fonts.css`, and load same-origin under `default-src 'self'` — so there is no per-browser CSS variance and nothing third-party to pin. (SRI doesn't apply to `@font-face` files anyway; same-origin + CSP is the control.) The latin `unicode-range` covers all the site's Latin text; the few decorative glyphs (◆ → ← ↗) fall back to the system font, exactly as before.
+- **Three.js is vendored, not SRI-pinned from a CDN.** `vendor/three.min.js` is byte-for-byte the r128 build the published cdnjs SRI hash pins (verified by re-hashing on vendoring — see `vendor/README.md`). Same-origin under `default-src 'self'` is a stronger guarantee than SRI on a remote file, and if the file is ever missing the 3D keystone degrades to a drawn SVG arch.
+- **Fonts are self-hosted.** The Fraunces / Hanken Grotesk / JetBrains Mono variable WOFF2s (latin subset) live in `fonts/`, declared by `css/fonts.css`. The latin `unicode-range` covers all the site's Latin text; the few decorative glyphs (◆ → ← ↗) fall back to the system font, exactly as before. (SRI doesn't apply to `@font-face` files anyway; same-origin + CSP is the control.)
 
 ## Robustness notes
 
