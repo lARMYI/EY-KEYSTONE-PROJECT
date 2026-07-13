@@ -46,7 +46,11 @@
     nolose:{title:'Why it is no-lose', chips:['What if it doesn\u2019t scale?','What does EY keep if it stops?'],
       text:'Keystone is a staged strategic option, not an all-or-nothing bet. It sells capability \u2014 the governed machine that builds apps, solutions, agents and modernized systems repeatably \u2014 not one-off products, so every gate produces reusable value. If it stops early, EY keeps the Gate methodology, control models, delivery playbooks and marketplace packaging; partners keep regulated reference deployments and buyer signal; clients keep a governance assessment and AI control blueprint. Limited downside, measured upside, reusable assets, clear exit ramps.'},
     decision:{title:'The 90-day proof', chips:['What\u2019s the 90-day proof?','What exactly is being asked?'],
-      text:'The ask: approve a contained 90-day foundation \u2014 operating model, governance gate, partner terms, first prototype \u2014 then make a scale-or-stop decision on a proof where each line is a yes or a no. Venture charter signed (decision rights, governance board, IP, kill/scale gates); Keystone Gate v1 published and cleared by Independence and Risk; one governed banking agent (third-party risk review) live in the sandbox on governed data, run through the Gate against a manual baseline; one named partner committed in writing to compute and embedded engineers; two lighthouse banks in named conversations with one signed sandbox LOI; core team named. Checkable at day 90 \u2014 if the proof is there EY scales; if not, EY keeps the governance IP and walks away whole.'}
+      text:'The ask: approve a contained 90-day foundation \u2014 operating model, governance gate, partner terms, first prototype \u2014 then make a scale-or-stop decision on a proof where each line is a yes or a no. Venture charter signed (decision rights, governance board, IP, kill/scale gates); Keystone Gate v1 published and cleared by Independence and Risk; one governed banking agent (third-party risk review) live in the sandbox on governed data, run through the Gate against a manual baseline; one named partner committed in writing to compute and embedded engineers; two lighthouse banks in named conversations with one signed sandbox LOI; core team named. Checkable at day 90 \u2014 if the proof is there EY scales; if not, EY keeps the governance IP and walks away whole.'},
+    ainative:{title:'Becoming AI-native', chips:['What does AI-native actually mean?','Where is EY on the maturity curve?','How do we measure success?'],
+      text:'AI-native is not more AI — it is a different operating model: the default unit of work is a governed agent, knowledge and controls are executable, operations are software-defined, and capability compounds with every engagement. AI-enabled bolts AI onto the firm; AI-native rebuilds the firm as a governed system of agents, with people moving from doing the work to directing, supervising and governing it. Keystone frames the journey on a six-level ladder — L0 Manual, L1 Assisted, L2 Augmented, L3 Orchestrated, L4 Governed-autonomous, L5 AI-native. EY today sits around L1–L2; the decisive jump is L2→L3, where governance stops being a review you pass and becomes code that runs — the Gate. Three horizons: Today (AI-assisted), +12 months (governed systems in production, L3), +3 years (a governed substrate across industries, L4→L5). Success is tracked on a scorecard across capability & leverage, governance & trust, economics, and adoption & talent. Full detail lives on the roadmap supplement — roadmap.html, maturity.html, quarters.html. These levels, horizons and targets are Keystone-proposed planning artifacts, not EY commitments.'},
+    roadmap:{title:'The roadmap to AI-native', chips:['Show me the 3-year plan','What are the quarterly goals?','How do the pillars mature?'],
+      text:'The transition runs over three years and twelve quarters, staged in four phases that mirror the scale path: Phase 0 Foundation (60–90 days), Phase 1 Banking Proving Ground (6–9 months), Phase 2 Systems Scale (12–18 months), Phase 3 Global Substrate (24–36 months). Each quarter carries a theme, a target maturity level and a yes/no measure — the 90-day proof’s evidence discipline extended across three years. Seven pillars each climb the ladder: the Lab (how EY builds), Keystone OS (environment-as-code runtime), the Gate (trust & certification), the Truth Layer (knowledge & AI memory), Workforce & Capability (pyramid→diamond), Proving Grounds (banking→multi-industry), and Operating Model & Economics (hours→productized, outcome-priced capacity — services-as-software). The market is moving the same way: peers are standing up agent operating systems (KPMG Workbench, PwC Agent OS, Deloitte Zora) and pricing is shifting from hours to outcomes. The roadmap supplement renders all of it — roadmap.html (definition, ladder, horizons, scorecard, plus twelve cross-cutting enablers the plan must also carry: funding, an independence firewall, data access, security, liability, client procurement, change management, vendor exit, evaluation, talent, regulator engagement, compute cost), maturity.html (the pillars), quarters.html (the quarterly plan and an honest, capability-gated read of the dates — independence clearance and bank procurement move slower than any Gantt chart, so the later phases re-date by roughly +12–24 months and L5 is a destination, not a 2029 deliverable).'}
   };
   const GLOBAL_CHIPS = ['What does EY already have \u2014 and what\u2019s missing?','What happens if EY waits?','Show me the scale \u2014 charted','What would a skeptical managing partner ask?'];
 
@@ -66,7 +70,13 @@
     ['Gate certification steps',6,'steps'],
     ['Certification levels (agent \u2192 playbook)',5,'levels'],
     ['Market access tiers',4,'tiers'],
-    ['Strategic arc',3,'years']
+    ['Strategic arc',3,'years'],
+    ['AI-native maturity levels (L0 → L5)',6,'levels'],
+    ['Transformation horizons',3,'horizons'],
+    ['Development plan',12,'quarters'],
+    ['Transformation pillars',7,'pillars'],
+    ['Delivery phases',4,'phases'],
+    ['Cross-cutting enablers',12,'workstreams']
   ];
   const FACTS_TEXT='DATA TABLE \u2014 the only chartable values (label | value | unit). Chart values verbatim; one consistent unit per chart; NEVER chart zeros, projections, or values not on this table:\n'+
     FACTS.map(f=>f[0]+' | '+f[1]+' | '+f[2]).join('\n');
@@ -86,7 +96,14 @@
     ks1:{s:'keystone-proposed',t:'Keystone proposes the governed systems lab \u2014 the Gate, Keystone OS runtime, evidence ledger, certification model, industry proving grounds \u2014 producing governed apps, solutions, agents and modernized core technology, plus net-new frontier systems',src:'Keystone working concept',d:'authored'},
     ks2:{s:'keystone-proposed',t:'Banking is the first proving ground, with three named demonstrators',src:'Keystone working concept',d:'authored'},
     ks3:{s:'keystone-proposed',t:'A 90-day proof where every line is a yes or no; staged as a no-lose option',src:'Keystone working concept',d:'authored'},
-    ks4:{s:'keystone-proposed',t:'Target of 100,000 governed agents by 2028 under Gate certification',src:'Keystone working concept',d:'authored'}
+    ks4:{s:'keystone-proposed',t:'Target of 100,000 governed agents by 2028 under Gate certification',src:'Keystone working concept',d:'authored'},
+    ey7:{s:'ey-public',t:'EY launched enterprise-scale agentic AI across assurance, embedded in audit workflows with auditors retaining judgment and approval authority',src:'EY Newsroom',d:'Apr 2026',u:'https://www.ey.com/en_gl/newsroom/2026/04/ey-launches-enterprise-scale-agentic-ai-to-redefine-the-audit-experience-for-the-ai-era'},
+    mk5:{s:'market',t:'AI is shifting professional-services pricing from billable hours toward outcomes — software eating labor, services-as-software',src:'Andreessen Horowitz',d:'2024–25',u:'https://a16z.com/newsletter/december-2024-enterprise-newsletter-ai-is-driving-a-shift-towards-outcome-based-pricing/'},
+    mk6:{s:'market',t:'GenAI adoption in professional services nearly doubled year on year, with explicit pressure on the billable-hour model',src:'Thomson Reuters',d:'2025',u:'https://www.thomsonreuters.com/en/reports/2025-generative-ai-in-professional-services-report'},
+    mk7:{s:'market',t:'Peers are standing up agent operating systems: KPMG Workbench, PwC Agent OS, Deloitte Zora',src:'KPMG / peers',d:'2025',u:'https://kpmg.com/us/en/media/news/kpmg-launches-kpmg-workbench-a-multi-agent-ai-platform.html'},
+    ks5:{s:'keystone-proposed',t:'An L0–L5 AI-native maturity ladder (Manual → Assisted → Augmented → Orchestrated → Governed-autonomous → AI-native) as the firm’s transformation model',src:'Keystone working concept',d:'authored'},
+    ks6:{s:'keystone-proposed',t:'A 12-quarter development plan across three horizons (today / +12 months / +3 years), each quarter with a target maturity level and a yes/no measure',src:'Keystone working concept',d:'authored'},
+    ks7:{s:'keystone-proposed',t:'A success scorecard across capability & leverage, governance & trust, economics, and adoption & talent to measure AI-native progress',src:'Keystone working concept',d:'authored'}
   };
   const CLAIMS_TEXT='CLAIM REGISTRY — cite ids inline like [ey3]. Statuses: ey-public = verified EY-official fact; market = external signal; keystone-proposed = authored strategy, NOT yet an EY fact:\n'+
     Object.keys(CLAIMS).map(k=>'['+k+'] '+CLAIMS[k].s+' — '+CLAIMS[k].t+' ('+CLAIMS[k].src+', '+CLAIMS[k].d+')').join('\n');
@@ -488,6 +505,8 @@ Reply ONLY a JSON object (no prose, no fences):\n{"challenge":"the single toughe
   }
 
   /* meta row: certification + confidence + actions + follow-ups */
+  /* KB topics that live on the roadmap supplement, not on this page */
+  const SUPP={ainative:'roadmap.html',roadmap:'roadmap.html'};
   function decorate(node,meta,secId,answerText,evidence,followups,conf,basis){
     const body=node.querySelector('.kai-body');
     const row=document.createElement('div'); row.className='kai-meta';
@@ -498,13 +517,15 @@ Reply ONLY a JSON object (no prose, no fences):\n{"challenge":"the single toughe
       html+='<span class="kai-meta-t kai-meta-dim">grounded</span>';
     }
     if(meta&&meta.score!=null){
-      html+='<span class="kai-conf" title="'+String(meta.intent||'').replace(/"/g,'&quot;')+'"><i style="--p:'+Math.max(6,Math.min(100,meta.score))+'%"></i></span><span class="kai-meta-t">'+meta.score+'%</span>';
+      const sc=Math.max(0,Math.min(100,parseInt(meta.score,10)||0)); // numeric-coerce: score is LLM-derived, never trust it as markup
+      html+='<span class="kai-conf" title="'+String(meta.intent||'').replace(/"/g,'&quot;').replace(/</g,'&lt;')+'"><i style="--p:'+Math.max(6,sc)+'%"></i></span><span class="kai-meta-t">'+sc+'%</span>';
     }
     row.innerHTML=html;
     if(secId&&KB[secId]){
+      const onPage=!!document.getElementById(secId);
       const j=document.createElement('button'); j.className='kai-jump'; j.textContent=KB[secId].title+' \u2197';
-      j.title='Jump to this section';
-      j.onclick=()=>{ const el=document.getElementById(secId); if(el){ closePanel(); window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-70,behavior:reduceMotion?'auto':'smooth'}); } };
+      j.title=onPage?'Jump to this section':(SUPP[secId]?'Open the roadmap supplement':'Jump to this section');
+      j.onclick=()=>{ const el=document.getElementById(secId); if(el){ closePanel(); window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-70,behavior:reduceMotion?'auto':'smooth'}); } else if(SUPP[secId]){ window.location.href=SUPP[secId]; } };
       row.appendChild(j);
     }
     const cp=document.createElement('button'); cp.className='kai-copy'; cp.textContent='copy'; cp.title='Copy reply';

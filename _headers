@@ -1,0 +1,14 @@
+# Security headers for static hosts that read a _headers file
+# (Netlify, Cloudflare Pages). GitHub Pages ignores this file — the
+# equivalent Content-Security-Policy ships as a <meta http-equiv> tag
+# in every HTML page, so the CSP applies on every host either way.
+#
+# Keep this CSP in sync with the <meta http-equiv="Content-Security-Policy">
+# tags in index.html / roadmap.html / maturity.html / quarters.html.
+/*
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data:; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Cross-Origin-Opener-Policy: same-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=()
