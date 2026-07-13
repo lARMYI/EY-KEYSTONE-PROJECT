@@ -517,7 +517,8 @@ Reply ONLY a JSON object (no prose, no fences):\n{"challenge":"the single toughe
       html+='<span class="kai-meta-t kai-meta-dim">grounded</span>';
     }
     if(meta&&meta.score!=null){
-      html+='<span class="kai-conf" title="'+String(meta.intent||'').replace(/"/g,'&quot;')+'"><i style="--p:'+Math.max(6,Math.min(100,meta.score))+'%"></i></span><span class="kai-meta-t">'+meta.score+'%</span>';
+      const sc=Math.max(0,Math.min(100,parseInt(meta.score,10)||0)); // numeric-coerce: score is LLM-derived, never trust it as markup
+      html+='<span class="kai-conf" title="'+String(meta.intent||'').replace(/"/g,'&quot;').replace(/</g,'&lt;')+'"><i style="--p:'+Math.max(6,sc)+'%"></i></span><span class="kai-meta-t">'+sc+'%</span>';
     }
     row.innerHTML=html;
     if(secId&&KB[secId]){

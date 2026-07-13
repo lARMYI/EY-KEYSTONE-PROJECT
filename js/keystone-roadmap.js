@@ -273,8 +273,8 @@
     el.innerHTML=R.levels.map((l,i)=>
       '<div class="tier reveal" style="--tc:'+l[4]+';--d:'+(i*0.05)+'s">'+
       '<div class="tnum">'+l[0]+'</div>'+
-      '<div><div class="tn">'+esc(l[1])+'</div><div class="td">'+esc(l[2])+'</div></div>'+
-      '<div class="tm">'+esc(l[3])+'</div></div>').join('');
+      '<div style="min-width:0"><div class="tn">'+esc(l[1])+'</div><div class="td">'+esc(l[2])+'</div></div>'+
+      '<div class="tm" style="white-space:normal">'+esc(l[3])+'</div></div>').join('');
   }
 
   function renderHorizons(el){
@@ -282,7 +282,7 @@
     el.innerHTML=R.horizons.map(h=>
       '<div class="lhc reveal" style="border-top-color:'+h.color+'">'+
       '<div class="who" style="color:'+h.color+'">'+esc(h.tag)+' · '+esc(h.when)+'</div>'+
-      '<h4>'+esc(h.name)+'</h4>'+
+      '<h3>'+esc(h.name)+'</h3>'+
       '<div class="m" style="margin-top:12px"><span class="k">Maturity</span><span class="vv val">'+esc(h.level)+'</span></div>'+
       '<p style="margin:12px 0 4px;color:var(--mut);font-size:.92rem;line-height:1.55">'+esc(h.body)+'</p>'+
       '<div class="m" style="margin-top:12px"><span class="k">Signals you’re there</span></div>'+
@@ -333,7 +333,7 @@
       const ph=R.phases[q.phase];
       return '<div class="lhc reveal" style="border-top-color:'+ph[3]+';--d:'+(i*0.03)+'s">'+
         '<div class="who" style="color:'+ph[3]+'">'+q.q+' · '+esc(q.when)+' · '+ph[0]+'</div>'+
-        '<h4>'+esc(q.theme)+'</h4>'+
+        '<h3>'+esc(q.theme)+'</h3>'+
         '<div class="m" style="margin-top:10px"><span class="k">Target maturity</span><span class="vv val">'+esc(q.level)+'</span></div>'+
         '<ul class="creds" style="margin-top:12px">'+q.goals.map(g=>'<li style="font-size:.88rem">'+esc(g)+'</li>').join('')+'</ul>'+
         '<div class="m" style="margin-top:14px"><span class="k">How we measure</span><span class="vv">'+esc(q.measure)+'</span></div>'+
