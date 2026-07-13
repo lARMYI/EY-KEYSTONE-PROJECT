@@ -244,6 +244,8 @@ Rules:
       b.onclick=()=>{ if(!busy){ input.value=q; submit(); } };
       wrap.appendChild(b);
     });
+    // announce the greeting on open (the log is no longer a live region)
+    srSay('Keystone briefing agent ready — grounded in this pitch. '+list.length+' suggested questions, or type your own message below.');
   }
 
   function refreshCtx(){

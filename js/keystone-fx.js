@@ -64,7 +64,8 @@
   addEventListener('pointermove', e=>{
     if(!isMouse(e)) return;                          // don't summon the halo for touch
     tx = e.clientX; ty = e.clientY;
-    if(!seen){ seen = true; rx = tx; ry = ty; ring.style.opacity = '1'; }
+    if(!seen){ seen = true; rx = tx; ry = ty; }
+    ring.style.opacity = '1';                        // re-show on every move — hide() (blur/leave/cancel) can fire repeatedly
     if(!hraf) hraf = requestAnimationFrame(loop);
   }, {passive:true});
   addEventListener('pointerdown', e=>{ if(isMouse(e)) ring.classList.add('down'); });
