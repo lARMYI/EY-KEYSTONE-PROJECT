@@ -27,11 +27,13 @@
     });
   }
 
-  let ran = false;
+  let ran = false, obsAlive = false;
   const go = ()=>{ if(ran) return; ran = true; run(); };
   try{
-    const obs = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) go(); }), {threshold:.3});
+    const obs = new IntersectionObserver(es=>es.forEach(e=>{ obsAlive = true; if(e.isIntersecting) go(); }), {threshold:.3});
     obs.observe(sim);
   }catch(e){ go(); }
-  setTimeout(go, 2600);    // safety if the observer never fires
+  // only fire the timed fallback if the observer never reported at all (frozen/
+  // throttled tab). A healthy observer keeps the run gated to scroll-into-view.
+  setTimeout(()=>{ if(!obsAlive) go(); }, 2600);
 })();

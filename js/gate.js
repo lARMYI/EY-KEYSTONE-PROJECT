@@ -63,6 +63,23 @@
     for(let i=0;i<28;i++){ h=(h*1103515245+12345)>>>0; out+=(h>>16)&1 ? '1':'0'; }
     return out;
   }
+  function traceMaker(seed){
+    // deterministic ids for the evidence-trace drill-down, derived from the passport seed
+    let h=0; for(const c of seed) h=(h*31 + c.charCodeAt(0))>>>0;
+    const next=()=>{ h=(h*1103515245+12345)>>>0; return h; };
+    return n=>{ let s=''; while(s.length<n) s+=next().toString(16); return s.slice(0,n); };
+  }
+  function traceRows(no,agent){
+    const hx=traceMaker(no+agent);
+    return [
+      ['identity.bind','owner EY.ai · scope locked · sig 0x'+hx(8)],
+      ['eval.run #E-'+hx(4).toUpperCase(),'<i>+47% vs manual baseline</i> · 0 criticals · harness v3'],
+      ['independence.review','restricted-use catalog: no match · board sig 0x'+hx(8)],
+      ['redteam.sweep #R-'+hx(4).toUpperCase(),'128 probes · <i>0 breaches</i> · transcripts sealed'],
+      ['evidence.seal','merkle root 0x'+hx(12)+' · 6 artifacts bound'],
+      ['passport.issue',no+' · revocable · continuously monitored'],
+    ].map(r=>'<div class="pp-tr"><span class="k">'+r[0]+'</span><span class="v">'+r[1]+'</span></div>').join('');
+  }
 
   function mint(){
     const agent = pickEl ? pickEl.value : 'Governed Agent';
@@ -72,7 +89,7 @@
     const stamps = STEPS.map(s=>`<span class="pp-stamp">${s.stamp}<i>✓</i></span>`).join('');
     const cells = [...hash].map(b=>`<i class="${b==='1'?'on':''}"></i>`).join('');
     stage.innerHTML = `
-      <div class="passport" id="passport" role="img" aria-label="Agent Passport — Certified">
+      <div class="passport" id="passport" role="group" aria-label="Agent Passport — Certified">
         <div class="pp-sheen" aria-hidden="true"></div>
         <div class="pp-top">
           <div class="pp-seal"><span class="pp-key"></span></div>
@@ -82,17 +99,19 @@
           </div>
           <div class="pp-badge">Certified</div>
         </div>
-        <div class="pp-grid">
+        <dl class="pp-grid">
           <div><dt>Agent</dt><dd>${agent}</dd></div>
           <div><dt>Class</dt><dd>Regulated · production-eligible</dd></div>
           <div><dt>Passport No.</dt><dd class="mono">${no}</dd></div>
           <div><dt>Issued</dt><dd>${date}</dd></div>
           <div><dt>Gate</dt><dd>Keystone Gate v1</dd></div>
           <div><dt>Independence</dt><dd>Cleared</dd></div>
-        </div>
+        </dl>
         <div class="pp-stamps">${stamps}</div>
         <div class="pp-hash" aria-hidden="true">${cells}</div>
-        <div class="pp-foot">Issued under EY independence &amp; assurance standards · revocable · continuously monitored</div>
+        <button class="pp-tracebtn" id="ppTraceBtn" type="button" aria-expanded="false" aria-controls="ppTraceBody">view evidence trace ▸</button>
+        <div class="pp-trace" id="ppTraceBody">${traceRows(no,agent)}</div>
+        <div class="pp-foot">Issued under EY independence &amp; assurance standards · revocable · continuously monitored · trace is a simulation of the sealed record</div>
       </div>
       <div class="gate-again">
         <button class="btn ghost magnetic" id="gateAgain">Certify another agent</button>
@@ -102,6 +121,12 @@
     setTimeout(()=> stage.classList.add('show'), 40); // rAF-frozen / throttled-tab fallback
     const again = document.getElementById('gateAgain');
     if(again) again.addEventListener('click', ()=>{ reset(); run(); });
+    const tbtn = document.getElementById('ppTraceBtn'), tbody = document.getElementById('ppTraceBody');
+    if(tbtn && tbody) tbtn.addEventListener('click', ()=>{
+      const open = tbody.classList.toggle('show');
+      tbtn.setAttribute('aria-expanded', open?'true':'false');
+      tbtn.textContent = open ? 'hide evidence trace ▾' : 'view evidence trace ▸';
+    });
     token.classList.add('done');
     runBtn.disabled = false;
     runBtn.textContent = 'Run certification';

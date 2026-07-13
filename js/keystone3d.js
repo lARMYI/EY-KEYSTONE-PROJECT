@@ -19,7 +19,9 @@
   const coarse = matchMedia('(pointer: coarse)').matches;
 
   let renderer;
-  try{ renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true, preserveDrawingBuffer:true }); }
+  // no preserveDrawingBuffer: nothing reads the canvas back (no toDataURL/readPixels),
+  // and it forces a full-screen framebuffer copy every frame — pure GPU cost.
+  try{ renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true }); }
   catch(e){ return; }
   renderer.setClearColor(0x000000, 0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -130,13 +132,18 @@
     const r = canvas.getBoundingClientRect();
     const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
     cssW = w; cssH = h;
-    renderer.setPixelRatio(Math.min(devicePixelRatio||1, 2));
+    renderer.setPixelRatio(Math.min(devicePixelRatio||1, coarse ? 1.5 : 2));  // cap MSAA cost on touch GPUs
     renderer.setSize(w, h, false);
     camera.aspect = w/h; camera.updateProjectionMatrix();
   }
   resize();
   addEventListener('resize', ()=>{ resize(); computeAnchors(); }, {passive:true});
   try{ new ResizeObserver(()=>{ resize(); computeAnchors(); }).observe(canvas); }catch(e){}
+  // the fixed canvas box doesn't change when the DOCUMENT grows, but the scroll
+  // anchors do — recompute them when page height shifts (lens notes injected,
+  // passport minted, disclosure rows pinned) or when late fonts reflow.
+  try{ new ResizeObserver(()=> computeAnchors()).observe(document.body); }catch(e){}
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(()=> computeAnchors()).catch(()=>{}); }
   [120,300,700,1500].forEach(d=> setTimeout(()=>{ resize(); computeAnchors(); }, d));  // timer heal where rAF/RO are frozen
 
   /* ---- cursor parallax ---- */
@@ -251,11 +258,18 @@
     renderer.render(scene, camera);
   }
 
+  let healFrames = 0;
   function frame(){
     requestAnimationFrame(frame);
-    // self-heal: if the canvas was measured before layout settled (0/1px), re-size
-    const r = canvas.getBoundingClientRect();
-    if(Math.max(1,Math.round(r.width))!==cssW || Math.max(1,Math.round(r.height))!==cssH){ resize(); computeAnchors(); }
+    // self-heal against init layout races — but only until the size is stable for
+    // a stretch of frames. window resize + the canvas ResizeObserver cover every
+    // later change, so we stop the per-frame getBoundingClientRect (a forced
+    // layout read) once settled instead of paying it for the page's lifetime.
+    if(healFrames < 20){
+      const r = canvas.getBoundingClientRect();
+      if(Math.max(1,Math.round(r.width))!==cssW || Math.max(1,Math.round(r.height))!==cssH){ resize(); computeAnchors(); healFrames = 0; }
+      else healFrames++;
+    }
     const t = clock.getElapsedTime();
     const dt = Math.min(0.05, Math.max(0.001, t - lastT)); lastT = t;   // frame-rate independent (no 2x spin on 120Hz)
     const tgt = targetAt(scrollY);
