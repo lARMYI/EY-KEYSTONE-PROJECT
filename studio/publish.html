@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data:; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'">
+<title>Client Build Studio — publish</title>
+<meta name="description" content="Assemble certified artifacts into the deliverable, export the portable engagement memory, and generate the agent build order.">
+<meta name="theme-color" content="#070A10">
+<link rel="stylesheet" href="../css/fonts.css">
+<link rel="stylesheet" href="../css/keystone.css">
+<link rel="stylesheet" href="css/studio.css">
+</head>
+<body>
+
+<main class="wrap">
+
+  <header class="s-hero reveal">
+    <span class="eyebrow">Publish</span>
+    <h1>It leaves the <em>building.</em></h1>
+    <p class="lede">
+      Three outputs, because a deliverable that cannot be resumed or extended is a dead end:
+      the assembled document, the portable memory, and the build order an agent can work from.
+      Only certified artifacts reach the first of them.
+    </p>
+  </header>
+
+  <div id="gate-note"></div>
+
+  <section class="s-block reveal" aria-labelledby="h-status">
+    <h2 class="s-h2" id="h-status">What will assemble</h2>
+    <div id="pub-status"></div>
+    <div id="pub-ladder" style="margin-top:18px"></div>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-exports">
+    <h2 class="s-h2" id="h-exports">The exports</h2>
+    <p class="s-sub">
+      Copy to clipboard is the guaranteed path under this site's content policy. The download
+      button appears where the browser supports it.
+    </p>
+    <div id="exports"></div>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-publish">
+    <h2 class="s-h2" id="h-publish">Publish</h2>
+    <div id="pub-action"></div>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-expand">
+    <h2 class="s-h2" id="h-expand">Expand</h2>
+    <p class="s-sub">
+      The part that makes this an application rather than a document: the app reads its own
+      diagnosis and proposes additions to its own structure, for a human to accept or refuse.
+    </p>
+    <div id="expand"></div>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-import">
+    <h2 class="s-h2" id="h-import">Resume or fork</h2>
+    <div id="import"></div>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-integ">
+    <h2 class="s-h2" id="h-integ">Integrity</h2>
+    <div id="pub-integrity"></div>
+  </section>
+
+  <div style="height:60px"></div>
+</main>
+
+<script src="js/cbs-schema.js"></script>
+<script src="js/cbs-spine.js"></script>
+<script src="js/cbs-lanes.js"></script>
+<script src="js/cbs-patterns.js"></script>
+<script src="js/cbs-state.js"></script>
+<script src="js/cbs-graph.js"></script>
+<script src="js/cbs-render.js"></script>
+<script src="js/cbs-gate.js"></script>
+<script src="js/cbs-agent.js"></script>
+<script src="js/cbs-publish.js"></script>
+<script src="js/cbs-console.js"></script>
+<script src="js/cbs-page-publish.js"></script>
+</body>
+</html>

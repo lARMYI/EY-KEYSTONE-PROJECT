@@ -73,6 +73,98 @@ Three companion pages turn the pitch's "Prove → Scale → Transform" arc into 
 
 Design tokens live in `:root` in `css/keystone.css` — navy ground (`#070A10`), metallic gold (`#E9B84A`), Fraunces for display, Hanken Grotesk for UI, JetBrains Mono for labels.
 
+## Client Build Studio — the method, as an application
+
+`studio/` is a separate app that generalizes the method this pitch site was built
+by, so it can be run for any client and any deliverable. The pitch site is left
+untouched and becomes its **worked example**: every area in the studio links to
+the place in `index.html` (or a supplement) where that move is visible in
+something that shipped.
+
+```
+studio/index.html      the playbook — sections, areas, artifacts, all from the spine
+studio/build.html      the Commission, the Board, the Workbench, the Gate
+studio/library.html    lanes, patterns, the criteria catalog, the personas
+studio/publish.html    assembly, the three exports, and the expansion loop
+studio/css/studio.css  studio components (tokens come from css/keystone.css)
+studio/js/cbs-*.js     schema, spine, lanes, patterns, state, graph, render,
+                       gate, agent, publish, console, page controllers
+```
+
+### The spine
+
+`studio/js/cbs-spine.js` holds the whole method as data: **8 sections → 30 areas →
+64 artifacts → 105 criteria**, plus 6 lanes, 64 patterns and 6 red-team personas.
+Nothing in the HTML is content and nothing in the spine is markup — empty the
+spine and the pages render empty rather than stale. `cbs-schema.js` validates it
+at load on every page (duplicate ids, unknown criterion kinds, dead inputs,
+dependency cycles, criteria naming unregistered tests, areas with nothing that can
+fail) and reports failures in the UI instead of white-screening.
+
+Sections: **Commission · Frame · Ground · Shape · Make · Prove · Publish · Expand.**
+
+### Criteria and the Gate
+
+Three kinds of criterion — **binary** (a yes/no, some auto-tested), **evidence**
+(every claim carries Verified / Proposed / Unsourced), and **review** (a named
+persona must not find the named failure). The Gate certifies an artifact only when
+every binary criterion passes, zero claims are Unsourced, and every persona review
+is resolved; high-severity criteria cannot be waived. Certification mints an
+**Artifact Passport**, and editing a certified artifact withdraws its certification
+automatically.
+
+Two honesty rules are load-bearing here: an auto-test that cannot decide returns
+`unknown` and falls back to a human rather than passing by default, and the
+evidence hash is an FNV-1a **content fingerprint for drift detection**, labelled as
+such — not a cryptographic digest.
+
+### Three-tier generation
+
+| Tier | Mechanism | Available |
+| --- | --- | --- |
+| 1 — Composer | Deterministic: pattern template × commission answers × upstream drafts | Always, offline |
+| 2 — Live agent | `window.claude.complete({messages})` — the same contract `js/keystone-ai.js` uses | When the host provides it |
+| 3 — Prompt pack | Copy a full prompt into any Claude session, paste the JSON back through a validating importer | Always |
+
+Tier 2 output is **merged onto** the Tier 1 draft part by part, so a failed, empty
+or garbled call degrades to a real draft rather than a blank one. Every artifact
+displays the tier that produced it.
+
+### Self-organizing, self-creating
+
+The graph engine (`cbs-graph.js`) prunes scope from the commission answers,
+resolves AND/OR dependency groups, computes readiness **R0–R5**, surfaces exactly
+one **next best action**, and runs `diagnose()` — a self-audit for dead inputs,
+areas that produce nothing, unsourced claims and criteria that never fail.
+
+Expansion has three human-accepted paths: **node proposals** (the agent reads the
+diagnosis and proposes a schema-conforming node; a proposal that would break
+validation is refused, not accepted and apologised for), **draft generation**, and
+**pattern promotion** (a certified artifact becomes a library pattern with its
+criteria attached and its client content stripped). Accepted nodes land in a
+localStorage **overlay** merged over the spine at read time — `cbs-spine.js` is
+never written by the browser.
+
+### Publish
+
+Three outputs: a self-contained **deliverable** in the lane's shape (only certified
+artifacts, with anything omitted named in the certification record),
+**`engagement.json`** (the portable memory, re-importable to the same state), and
+**`BUILD-ORDER.md`** (dependency-ordered build list, design tokens, the criteria as
+acceptance tests, the claim registry, and a prompt per artifact — enough for an
+agentic coding tool to scaffold the full thing). Clipboard is the guaranteed export
+path under this site's CSP; the download button is a feature-detected enhancement.
+
+### Running and constraints
+
+Served by the same static host — `python3 -m http.server 8000`, then
+`http://localhost:8000/studio/`. No build step, no dependencies, no external
+requests. All four studio pages carry the identical `<meta>` CSP as the rest of the
+site, so `script-src 'self'` holds: no inline `<script>`, no `eval`, and a
+criterion's `test` is the **name** of a registered function rather than a string to
+evaluate. Every node is built with `createElement` / `textContent` — there is no
+`innerHTML` path for engagement text, agent output, or an imported file.
+
 ## The briefing agent and its LLM
 
 `js/keystone-ai.js` calls `window.claude.complete({messages})` (the hosted-artifact contract it was designed against, model `claude-haiku-4-5`). When that API is absent — e.g. on a plain static host — the chat UI still loads and degrades gracefully: it replies "The live agent isn't reachable right now" and points the reader at the relevant page section.

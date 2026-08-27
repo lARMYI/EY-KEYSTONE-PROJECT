@@ -107,30 +107,62 @@
   }
 
   /* -------------------------------------------------------------- reveals */
-  /* Same contract as the pitch site: reveal on intersect, and force everything
-     to its end state if the document timeline is not running (background tab,
-     reduced motion, no IntersectionObserver). Never leave content invisible. */
+  /* Same doctrine as the pitch site: content is never left invisible. The
+     IntersectionObserver is the nice path; the sweep is the guarantee. A fast
+     scroll, a throttled tab, or a missing observer can all leave an element
+     un-notified, so a rAF-throttled scroll sweep reveals anything that has
+     reached or passed the viewport regardless of what the observer saw. */
   function reveals(root) {
-    var nodes = (root || d).querySelectorAll('.reveal:not(.in)');
+    var scope = root || d;
     var reduced = w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced || !w.IntersectionObserver) {
-      Array.prototype.forEach.call(nodes, function (n) { n.classList.add('in'); });
-      return;
+
+    function pending() { return scope.querySelectorAll('.reveal:not(.in)'); }
+
+    function revealAll() {
+      Array.prototype.forEach.call(pending(), function (n) { n.classList.add('in'); });
     }
+
+    if (reduced || !w.IntersectionObserver) { revealAll(); return; }
+
     var io = new w.IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
       });
     }, { rootMargin: '0px 0px -8% 0px', threshold: .05 });
-    Array.prototype.forEach.call(nodes, function (n) { io.observe(n); });
+    Array.prototype.forEach.call(pending(), function (n) { io.observe(n); });
 
-    /* Health fallback — if nothing has revealed after a beat, reveal it all. */
-    w.setTimeout(function () {
-      Array.prototype.forEach.call((root || d).querySelectorAll('.reveal:not(.in)'), function (n) {
-        var r = n.getBoundingClientRect();
-        if (r.top < w.innerHeight) n.classList.add('in');
+    /* Anything at or above the fold — including everything already scrolled
+       past — is revealed outright. */
+    function sweep() {
+      var left = pending();
+      Array.prototype.forEach.call(left, function (n) {
+        if (n.getBoundingClientRect().top < w.innerHeight) {
+          n.classList.add('in');
+          io.unobserve(n);
+        }
       });
-    }, 1200);
+      if (!pending().length) detach();
+    }
+
+    var ticking = false;
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      w.requestAnimationFrame(function () { sweep(); ticking = false; });
+    }
+    function detach() {
+      w.removeEventListener('scroll', onScroll);
+      w.removeEventListener('resize', onScroll);
+    }
+
+    w.addEventListener('scroll', onScroll, { passive: true });
+    w.addEventListener('resize', onScroll, { passive: true });
+    w.setTimeout(sweep, 1200);
+
+    /* If the document timeline is frozen (background tab), transitions never
+       run and the observer may never fire. Give up gracefully and show it all
+       rather than leaving the reader with blank sections. */
+    w.setTimeout(function () { if (pending().length) revealAll(); detach(); }, 8000);
   }
 
   /* ---------------------------------------------------------------- toast */

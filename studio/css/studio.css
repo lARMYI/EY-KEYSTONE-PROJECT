@@ -444,3 +444,9 @@ h3.s-h3 {
 .arch-ground { stroke: var(--line-2); stroke-width: 1; }
 
 @media (prefers-reduced-motion: reduce) { .vous { transition: none; } }
+
+/* A closed drawer must leave the tab order — a transform alone keeps its
+   buttons focusable, which strands keyboard users in an invisible panel. */
+.console { visibility: hidden; transition: transform .38s cubic-bezier(.2, .7, .2, 1), visibility .38s; }
+.console.open { visibility: visible; }
+@media (prefers-reduced-motion: reduce) { .console { transition: none; } }

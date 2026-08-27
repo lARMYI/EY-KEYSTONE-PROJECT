@@ -588,6 +588,36 @@
           el('div.pp-row', null, [el('span', { text: 'claims' }), el('span', { text: String(art.passport.claims.length) })]),
           el('div.pp-hash', { text: 'fingerprint ' + art.passport.evidenceHash + ' — ' + art.passport.note })
         ]));
+        /* Promotion closes the loop: a certified artifact becomes a pattern the
+           next engagement starts from. Client-identifying content is stripped —
+           the hints travel, the answers do not. */
+        kids.push(el('button.btn.ghost', {
+          type: 'button', style: 'margin-top:10px', text: 'Promote to a pattern',
+          title: 'Adds a reusable pattern to the library, with this artifact\'s criteria attached and its client content stripped.',
+          onclick: function () {
+            var src = w.CBS_PATTERN_BY_ID[hit.artifact.pattern];
+            var promoted = {
+              id: 'pat-promoted-' + hit.artifact.id,
+              title: hit.artifact.title + ' (promoted)',
+              lane: hit.artifact.lane,
+              purpose: hit.artifact.outputs,
+              sections: (art.draft.parts || []).map(function (part, i) {
+                return {
+                  h: part.h,
+                  hint: (src && src.sections[i] && src.sections[i].hint) || 'Carried over from a certified artifact.',
+                  fill: (src && src.sections[i] && src.sections[i].fill) || ''
+                };
+              }),
+              criteria: G.criteriaFor(id).map(function (e) {
+                return { id: 'promoted-' + e.criterion.id, kind: e.criterion.kind, text: e.criterion.text,
+                         severity: e.criterion.severity, persona: e.criterion.persona };
+              }),
+              promotedFrom: hit.artifact.id
+            };
+            S.promotePattern(promoted);
+            R.toast('Promoted — the body text was stripped, the shape and criteria travel');
+          }
+        }));
       } else {
         kids.push(el('button.btn', {
           type: 'button', text: res.ok ? 'Certify at the Gate' : 'Attempt certification',
