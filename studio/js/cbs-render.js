@@ -196,7 +196,6 @@
       ])
     ];
     if (opts.actions) kids.push(opts.actions);
-    else kids.push(el('span'));
     var row = el('div.crit' + (c.severity === 'high' ? '.sev-high' : ''), { dataset: { crit: c.id } }, kids);
     if (opts.result) row.classList.add(opts.result);
     return row;
