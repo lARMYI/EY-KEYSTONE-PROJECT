@@ -236,16 +236,34 @@
   R['chart.slope'] = function (s, p) {
     var W = s.width, H = s.height, m = { t: 34, r: 130, b: 30, l: 130 };
     var ih = H - m.t - m.b;
-    var all = s.series.reduce(function (a, ser) { return a.concat(ser.points.map(function (x) { return x.value; })); }, [0]);
-    var max = niceMax(Math.max.apply(null, all));
+    /* A slope chart is before-against-after, so it plots the FIRST and LAST
+       point of each series — not the first two. Scaling to points it does not
+       draw is how a slope chart ends up flat against the floor, which is the
+       encoding overstating nothing and understating everything. */
+    function ends(ser) {
+      var pts = ser.points || [];
+      return [pts[0] || { value: 0 }, pts[pts.length - 1] || pts[0] || { value: 0 }];
+    }
+    var drawn = s.series.reduce(function (a, ser) {
+      var e = ends(ser); return a.concat([e[0].value || 0, e[1].value || 0]);
+    }, [0]);
+    var max = niceMax(Math.max.apply(null, drawn));
     var kids = [];
-    var l0 = (s.series[0] && s.series[0].points[0] || {}).label || 'before';
-    var l1 = (s.series[0] && s.series[0].points[1] || {}).label || 'after';
+    var first = s.series[0] ? ends(s.series[0]) : [{}, {}];
+    var l0 = first[0].label || 'before';
+    var l1 = first[1].label || 'after';
     kids.push(label(m.l, 20, l0, { size: 10, anchor: 'middle', fill: p.model.muted, mono: true }));
     kids.push(label(W - m.r, 20, l1, { size: 10, anchor: 'middle', fill: p.model.muted, mono: true }));
+    /* Say so when the series carries points this encoding does not show. */
+    var skipped = s.series.reduce(function (n, ser) { return Math.max(n, (ser.points || []).length - 2); }, 0);
+    if (skipped > 0) {
+      kids.push(label(W / 2, H - 8, skipped + ' intermediate point(s) not shown — a slope chart plots endpoints only',
+        { size: 9, anchor: 'middle', fill: p.model.muted, mono: true, opacity: .8 }));
+    }
 
     s.series.forEach(function (ser, si) {
-      var a = (ser.points[0] || {}).value || 0, b = (ser.points[1] || {}).value || 0;
+      var e = ends(ser);
+      var a = e[0].value || 0, b = e[1].value || 0;
       var ya = m.t + ih - (max ? (a / max) * ih : 0);
       var yb = m.t + ih - (max ? (b / max) * ih : 0);
       var col = p.series[si % p.series.length];

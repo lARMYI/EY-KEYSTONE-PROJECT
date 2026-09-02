@@ -83,18 +83,21 @@ something that shipped.
 
 ```
 studio/index.html      the playbook — sections, areas, artifacts, all from the spine
-studio/build.html      the Commission, the Board, the Workbench, the Gate
+studio/build.html      the Commission, the Board, the Workbench, the Gate, the makers
+studio/design.html     the design system — tokens, contrast report, graphics gallery
 studio/library.html    lanes, patterns, the criteria catalog, the personas
 studio/publish.html    assembly, the three exports, and the expansion loop
-studio/css/studio.css  studio components (tokens come from css/keystone.css)
+studio/preview.html    the sandboxed render host (its own CSP; opaque origin)
+studio/css/studio.css  studio components, every rule scoped under .studio-body
 studio/js/cbs-*.js     schema, spine, lanes, patterns, state, graph, render,
-                       gate, agent, publish, console, page controllers
+                       gate, agent, tokens, visuals, preview, makers, publish,
+                       console, page controllers
 ```
 
 ### The spine
 
 `studio/js/cbs-spine.js` holds the whole method as data: **8 sections → 30 areas →
-64 artifacts → 105 criteria**, plus 6 lanes, 64 patterns and 6 red-team personas.
+64 artifacts → 106 criteria**, plus 6 lanes, 64 patterns and 6 red-team personas.
 Nothing in the HTML is content and nothing in the spine is markup — empty the
 spine and the pages render empty rather than stale. `cbs-schema.js` validates it
 at load on every page (duplicate ids, unknown criterion kinds, dead inputs,
@@ -145,6 +148,57 @@ criteria attached and its client content stripped). Accepted nodes land in a
 localStorage **overlay** merged over the spine at read time — `cbs-spine.js` is
 never written by the browser.
 
+### What an artifact makes
+
+Prose alone is not a deliverable, so an artifact can carry a real output beside its
+draft. A `makes` field names which, and the Workbench opens the matching maker in a
+second tab next to the Draft:
+
+| `makes` | The maker | What ships |
+| --- | --- | --- |
+| `tokens` | Colour, type scale, spacing, motion, with a live WCAG contrast report | 44 CSS custom properties, embedded in the deliverable |
+| `visual` | 13 figure types — 5 charts, 5 diagrams, 2 brand marks, a UI mockup | SVG, inlined into the deliverable |
+| `code` | HTML + CSS + optional JS, rendered live at 390 / 768 / 1440 | A scoped section in the deliverable, script removed |
+
+`cbs-tokens.js` is the maths — palette ramps, a modular type scale, WCAG 2.1
+relative luminance — and `cbs-visuals.js` is a **spec + renderer registry**: adding
+a figure type means adding a spec shape and a renderer, not a new code path.
+
+The rule that makes agentic graphics safe: **the model never authors markup.** Tier 2
+returns a spec *object*; the spec is validated and clamped locally (unknown kinds
+dropped, dimensions bounded, labels truncated); only then does a local renderer draw
+it with `createElementNS` / `textContent`, and export runs `XMLSerializer` over those
+same nodes — so the exported string is safe by construction rather than by escaping
+discipline. Authored **code** is the one thing that is markup, and it renders only
+inside `preview.html`, never in a studio page.
+
+### The preview frame
+
+`preview.html` is served over http, so it carries **its own** CSP
+(`default-src 'none'; connect-src 'none'`) rather than inheriting the studio's, and
+it is framed with `sandbox="allow-scripts"` and **without** `allow-same-origin`. That
+combination gives it an opaque origin: scripts run, but `localStorage` and the parent
+DOM both throw `SecurityError`. Verified in the test pass, not merely asserted.
+
+Because the origin is opaque, `'self'` matches nothing inside the frame, so its
+runtime is inline — the sandbox, not the CSP, is the boundary doing the work. This
+is also why executable previews needed **no change** to the site's policy: the CSP is
+byte-identical to before, across `_headers` and every `<meta>`.
+
+### Two criteria that stopped being "unknown"
+
+- **`t-contrast-floor`** computes real WCAG ratios over the live token set and names
+  the tightest pair, with a corrected colour when one fails.
+- **`t-responsive`** renders the artifact at a real 390px inside the frame and reads
+  back `scrollWidth`, so "works on mobile" is measured in pixels. It still returns
+  `unknown` when it has never been run — the studio does not pass a test it did not
+  perform.
+
+Two more arrived with the makers: `t-tokens-real` (a token set, not a palette, and
+its contrast holding) and `t-figures-captioned` (every figure states its comparison
+in words). The evidence hash covers maker output too, so editing a chart caption
+after the Gate withdraws the certification exactly as editing prose does.
+
 ### Publish
 
 Three outputs: a self-contained **deliverable** in the lane's shape (only certified
@@ -155,15 +209,30 @@ acceptance tests, the claim registry, and a prompt per artifact — enough for a
 agentic coding tool to scaffold the full thing). Clipboard is the guaranteed export
 path under this site's CSP; the download button is a feature-detected enhancement.
 
+The deliverable ships in the engagement's own token set, inlines its figures, and
+carries built sections with their CSS scoped to the section so they cannot restyle
+the document around them. **PDF is print-to-PDF**: a real print stylesheet with
+chosen page breaks and `@page` margins, no generator and no dependency — not a
+generated PDF binary. Script is removed from built sections on export, and the
+certification record says so rather than dropping it quietly: a deliverable is a
+document that gets forwarded, and the studio preview is where behaviour belongs.
+
 ### Running and constraints
 
 Served by the same static host — `python3 -m http.server 8000`, then
-`http://localhost:8000/studio/`. No build step, no dependencies, no external
-requests. All four studio pages carry the identical `<meta>` CSP as the rest of the
-site, so `script-src 'self'` holds: no inline `<script>`, no `eval`, and a
-criterion's `test` is the **name** of a registered function rather than a string to
-evaluate. Every node is built with `createElement` / `textContent` — there is no
-`innerHTML` path for engagement text, agent output, or an imported file.
+`http://localhost:8000/studio/`. No build step and no external requests; the only
+vendored dependency is three.js r128 (`vendor/three.min.js`), already present, which
+the 3D preview reuses. Every studio page except `preview.html` carries the identical
+`<meta>` CSP as the rest of the site, so `script-src 'self'` holds: no inline
+`<script>`, no `eval`, and a criterion's `test` is the **name** of a registered
+function rather than a string to evaluate. Every node is built with `createElement` /
+`textContent` — there is no `innerHTML` path for engagement text, agent output, or an
+imported file.
+
+**Honest limits.** PDF is print-to-PDF, not a generated binary. The 3D path is a scene
+renderer over parametric primitives, not a modelling tool or a mesh importer. "Live AI
+interactive" means the studio calls the agent and posts new specs into the frame — the
+frame has `connect-src 'none'` and can never call out itself.
 
 ## The briefing agent and its LLM
 

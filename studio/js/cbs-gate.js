@@ -19,6 +19,20 @@
     return a.draft.parts.map(function (p) { return (p.h || '') + '\n' + (p.body || ''); }).join('\n\n');
   }
 
+  /* Everything a maker wrote, flattened to text. Lives here rather than in
+     cbs-makers.js so that every page computes the same evidence hash — a page
+     without the makers loaded must not withdraw a certification for drift it
+     invented by not looking. */
+  function madeText(artifactId) {
+    var draft = S.artifact(artifactId).draft;
+    if (!draft) return '';
+    var bits = [];
+    if (draft.tokens) bits.push('tokens:' + draft.tokens.css);
+    if (draft.visuals) bits.push('visuals:' + JSON.stringify(draft.visuals));
+    if (draft.code) bits.push('code:' + draft.code.html + draft.code.css + draft.code.js);
+    return bits.join('||');
+  }
+
   function hasMarkers(text) {
     return /\[(NEEDS|REGISTRY|GENERATED)[^\]]*\]/.test(text || '');
   }
@@ -116,9 +130,8 @@
       if (!w.CBS_TOKENS) return U('The token engine is not loaded on this page.');
       var a = w.CBS_TOKENS.audit(S.get().tokens);
       if (a.pass) {
-        var lowest = a.results.reduce(function (m, r) { return r.ratio < m.ratio ? r : m; }, a.results[0]);
         return P('All ' + a.results.length + ' pairs clear their floor; tightest is ' +
-                 lowest.id + ' at ' + lowest.ratio.toFixed(2) + ':1.');
+                 a.tightest.id + ' at ' + a.tightest.ratio.toFixed(2) + ':1.');
       }
       var f = a.failed[0];
       return F(a.failed.length + ' pair(s) below the floor — ' + f.id + ' is ' +
@@ -129,15 +142,48 @@
     /* Responsive is measured inside the sandboxed preview at 390px, not asserted.
        Honest when it has not been run: the studio does not pass a test it never
        performed. */
-    't-responsive': function () {
-      var m = S.get().responsive;
-      if (!m || !m.at390) {
+    't-responsive': function (ctx) {
+      var m = S.get().responsive || {};
+      /* Prefer this artifact's own measurement; fall back to the last one taken
+         anywhere, and say which it is rather than blurring the two. */
+      var own = ctx && ctx.artifactId ? m[ctx.artifactId] : null;
+      var r = own || m.at390;
+      if (!r) {
         return U('Not measured yet — open the preview at Mobile 390 and the frame reports its own overflow.');
       }
-      var r = m.at390;
+      var where = own ? 'this artifact' : 'the last preview taken';
       return r.overflow
-        ? F('Overflows by ' + r.overflowBy + 'px at 390 (content is ' + r.scrollWidth + 'px wide).')
-        : P('No horizontal overflow at 390 (content ' + r.scrollWidth + 'px).');
+        ? F('Overflows by ' + r.overflowBy + 'px at 390 (' + where + ' is ' + r.scrollWidth + 'px wide).')
+        : P('No horizontal overflow at 390 (' + where + ', content ' + r.scrollWidth + 'px).');
+    },
+
+    /* Both of these read what a maker actually produced. Before phase 2 there
+       was nothing to read, which is why they did not exist. */
+    't-tokens-real': function (ctx) {
+      var draft = S.artifact(ctx.artifactId).draft;
+      var tk = draft && draft.tokens;
+      if (!tk || !tk.css) {
+        return U('No token set written into this artifact yet — the maker writes one from the live tokens.');
+      }
+      var n = (tk.css.match(/--[a-z0-9-]+:/g) || []).length;
+      if (n < 20) return F('Only ' + n + ' custom properties — that is a palette, not a system.');
+      if (tk.contrast && tk.contrast.pass === false) {
+        return F(n + ' properties defined, but ' + tk.contrast.failed + ' contrast pair(s) sit below their floor.');
+      }
+      return P(n + ' custom properties defined once and referenced everywhere.');
+    },
+
+    't-figures-captioned': function (ctx) {
+      var draft = S.artifact(ctx.artifactId).draft;
+      var specs = (draft && draft.visuals) || [];
+      if (!specs.length) return U('No figures on this artifact yet.');
+      var bad = specs.filter(function (s) {
+        var c = String(s.caption || '');
+        return !c.trim() || /\[(NEEDS|REGISTRY|GENERATED)/.test(c);
+      });
+      return bad.length
+        ? F(bad.length + ' of ' + specs.length + ' figure(s) carry no stated comparison.')
+        : P('All ' + specs.length + ' figure(s) state their comparison in words.');
     },
 
     /* Deliberately undecidable in the browser — these fall back to a human. */
@@ -215,7 +261,7 @@
       var r = S.get().criteria[e.criterion.id];
       return e.criterion.id + '=' + ((r && r.result) || 'blank');
     }).sort().join('|');
-    return fingerprint(draftText(artifactId) + '::' + claims + '::' + crits);
+    return fingerprint(draftText(artifactId) + '::' + madeText(artifactId) + '::' + claims + '::' + crits);
   }
 
   /* ------------------------------------------------------------ the Gate */
@@ -340,6 +386,7 @@
   w.CBS_GATE = {
     STAGES: STAGES,
     draftText: draftText,
+    madeText: madeText,
     hasMarkers: hasMarkers,
     autoEvaluate: autoEvaluate,
     runAutoCriteria: runAutoCriteria,

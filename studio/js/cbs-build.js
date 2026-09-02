@@ -252,6 +252,10 @@
   }
 
   /* ===================================================== 3. THE WORKBENCH */
+  /* The router re-renders in place rather than reloading, so the previous
+     workbench's subscription has to be dropped or they accumulate. */
+  var offArtifact = null;
+
   function renderWorkbench(artifactId) {
     var view = G.resolved();
     var hit = G.findArtifact(artifactId, view);
@@ -274,7 +278,7 @@
 
       el('div.wb', null, [
         briefCol(hit, pattern),
-        draftCol(hit, pattern),
+        middleCol(hit, pattern),
         critCol(hit)
       ])
     ]);
@@ -296,6 +300,114 @@
       }) : null,
       R.chip(art.state, isCert(artifactId) ? 'teal' : (art.state === 'drafted' ? 'blue' : null))
     ]));
+  }
+
+
+  /* The middle column carries two panels behind one tab strip: the prose draft,
+     and whatever this artifact actually MAKES — a token set, a set of figures,
+     or an HTML+CSS section rendered at real device widths. Artifacts that make
+     nothing still get a preview, because a deck of the parts is always
+     something real to look at. */
+  function middleCol(hit, pattern) {
+    var id = hit.artifact.id;
+    var makes = hit.artifact.makes || null;
+    var P = w.CBS_PREVIEW, M = w.CBS_MAKERS;
+
+    var draftPanel = draftCol(hit, pattern);
+    var makePanel = el('div.wb-panel');
+    var built = false;
+    var preview = null;
+    var maker = null;
+
+    var MAKE_LABEL = { tokens: 'Design system', visual: 'Figures', code: 'Code & preview' };
+
+    /* Built lazily: an iframe and thirteen renderers are not worth paying for
+       on an artifact whose maker tab is never opened. */
+    function build() {
+      if (built) return;
+      built = true;
+      var kids = [el('h4', { text: makes ? MAKE_LABEL[makes] : 'Preview' })];
+
+      /* Figures and tokens draw inline — they are locally rendered SVG and DOM,
+         and putting them behind a frame would only make them harder to read. */
+      var needsFrame = !makes || makes === 'code';
+      if (needsFrame && P) {
+        preview = P.create({ device: 'desktop', artifactId: id });
+      }
+      if (M && makes) {
+        maker = M.create(id, makes, { preview: preview });
+        if (maker) kids.push(maker.node);
+      }
+      if (preview) {
+        kids.push(el('div', { style: 'margin-top:18px' }, [
+          el('h4', { text: makes === 'code' ? 'Live at device widths' : 'Preview' }),
+          preview.node
+        ]));
+      }
+      mount(makePanel, kids);
+
+      if (preview && !makes) {
+        var payload = P.payloadFor(id);
+        if (payload) w.setTimeout(function () { preview.show(payload); }, 300);
+      }
+    }
+
+    var panels = [draftPanel, makePanel];
+    var tabDefs = [
+      { id: 'draft', label: 'Draft' },
+      { id: 'make', label: makes ? MAKE_LABEL[makes] : 'Preview' }
+    ];
+    var current = 'draft';
+
+    var tabs = el('div.wb-tabs', { role: 'tablist', 'aria-label': 'Artifact view' },
+      tabDefs.map(function (t) {
+        return el('button.etab', {
+          type: 'button', role: 'tab', text: t.label,
+          'aria-selected': t.id === current ? 'true' : 'false',
+          onclick: function () { select(t.id); }
+        });
+      }));
+
+    function select(which) {
+      current = which;
+      Array.prototype.forEach.call(tabs.children, function (b, i) {
+        b.setAttribute('aria-selected', tabDefs[i].id === which ? 'true' : 'false');
+      });
+      panels.forEach(function (p, i) { p.hidden = tabDefs[i].id !== which; });
+      if (which === 'make') {
+        build();
+        /* Refit after the panel is actually laid out, not before. */
+        if (preview) w.setTimeout(function () { preview.refit(); }, 60);
+        if (maker && maker.refresh) maker.refresh();
+      }
+    }
+
+    makePanel.hidden = true;
+
+    /* A maker writes to the same artifact the Draft panel and the criteria
+       column read, so both have to repaint when it does. Without this the Gate
+       panel keeps reporting "no draft yet" next to a section it can see. */
+    var repainting = false;
+    offArtifact = S.on('artifact', function (e) {
+      if (!e || e.id !== id || repainting) return;
+      repainting = true;
+      w.requestAnimationFrame(function () {
+        repainting = false;
+        paintStatus(id);
+        refreshCrits();
+      });
+    });
+
+    return el('div.wb-col.wb-mid', null, [
+      tabs,
+      makes ? el('p.small.dimmed.wb-makes-note', {
+        text: makes === 'tokens' ? 'This artifact carries a real token set, not a description of one.'
+            : makes === 'visual' ? 'This artifact carries drawn figures, not captions describing figures.'
+            : 'This artifact carries working HTML and CSS, measured at 390px rather than assumed responsive.'
+      }) : null,
+      draftPanel,
+      makePanel
+    ]);
   }
 
   function briefCol(hit, pattern) {
@@ -329,7 +441,7 @@
 
   function draftCol(hit, pattern) {
     var id = hit.artifact.id;
-    var col = el('div.wb-col');
+    var col = el('div.wb-panel');
     var pipe = el('div.pipe', { 'aria-live': 'polite', 'aria-label': 'Generation pipeline' },
       A.PIPELINE.map(function (name, i) {
         return el('div.pipe-stage', { dataset: { stage: String(i) }, text: name });
@@ -656,6 +768,7 @@
 
   function route() {
     var h = w.location.hash || '';
+    if (offArtifact) { offArtifact(); offArtifact = null; }
     if (h.indexOf('#wb/') === 0) { renderWorkbench(h.slice(4)); }
     else if (h === '#board') { renderBoard(); }
     else { renderCommission(); }

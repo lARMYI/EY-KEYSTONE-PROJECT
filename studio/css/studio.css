@@ -538,7 +538,54 @@
 .studio-body .pv-scaler { transform-origin: top center; flex: 0 0 auto }
 .studio-body .pv-frame { border: 0; display: block; background: #0B0F16 }
 
+/* ---------------------------------------------------- workbench makers */
+/* The middle column holds two panels behind one tab strip; the panels carry
+   no chrome of their own because the column already has it. */
+.studio-body .wb-mid { display: flex; flex-direction: column; }
+.studio-body .wb-panel { min-width: 0; }
+.studio-body .wb-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.studio-body .wb-makes-note { margin: -4px 0 14px; }
+
+.studio-body .mk { min-width: 0; }
+.studio-body .mk-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.studio-body .mk-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.studio-body .mk-field > label {
+  font-family: var(--mono); font-size: .62rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gold);
+}
+.studio-body .mk-field .hint { font-size: .76rem; color: var(--dim); line-height: 1.45; }
+.studio-body .mk-in {
+  background: rgba(255,255,255,.04); border: 1px solid var(--line); color: var(--ink);
+  border-radius: 8px; padding: 8px 10px; font-size: .84rem; font-family: inherit; min-width: 0; width: 100%;
+}
+.studio-body .mk-in:focus { outline: none; border-color: var(--gold); }
+.studio-body .mk-num { max-width: 110px; }
+.studio-body .mk-code {
+  background: rgba(0,0,0,.35); border: 1px solid var(--line); color: var(--ink);
+  border-radius: 10px; padding: 10px 12px; font-family: var(--mono); font-size: .76rem;
+  line-height: 1.55; resize: vertical; width: 100%;
+}
+.studio-body .mk-code:focus { outline: none; border-color: var(--gold); }
+.studio-body .mk-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.studio-body .mk-row { display: flex; gap: 8px; align-items: center; }
+.studio-body .mk-add { align-self: flex-start; }
+.studio-body .mk-check { display: flex; gap: 8px; align-items: center; font-size: .78rem; color: var(--mut); }
+.studio-body .mk-fig {
+  border: 1px solid var(--line); border-radius: var(--r); padding: 14px; margin-bottom: 16px;
+  background: rgba(255,255,255,.02);
+}
+.studio-body .mk-fig-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.studio-body .mk-art { border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+.studio-body .mk-art > svg { display: block; width: 100%; height: auto; }
+.studio-body .mk-contrast {
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 12px 0;
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: .84rem;
+}
+.studio-body .mk-contrast.ok { border-color: rgba(55,214,178,.34); }
+.studio-body .mk-contrast.bad { border-color: rgba(255,107,107,.4); }
+
 @media (max-width: 700px) {
   .studio-body .tok-grid { grid-template-columns: 1fr }
   .studio-body .vz-grid { grid-template-columns: 1fr }
+  .studio-body .mk-row { flex-wrap: wrap }
 }

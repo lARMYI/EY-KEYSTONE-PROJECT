@@ -511,7 +511,7 @@
           exemplar: ex('../css/keystone.css', 'The design system — tokens in :root, one navy ground, one metallic gold'),
           expand: 'A visual system per client is worth keeping. Promote token sets to the pattern library as named themes.',
           criteria: [
-            { id: 'c-vis-1', kind: 'binary', text: 'Tokens are defined once and referenced everywhere — no ad-hoc values in pieces.', severity: 'high' },
+            { id: 'c-vis-1', kind: 'binary', text: 'Tokens are defined once and referenced everywhere — no ad-hoc values in pieces.', test: 't-tokens-real', severity: 'high' },
             { id: 'c-vis-2', kind: 'binary', text: 'Body text meets at least 4.5:1 contrast against its ground.', test: 't-contrast-floor' },
             { id: 'c-vis-3', kind: 'binary', text: 'Motion is decorative only — nothing is understandable solely through animation.' },
             { id: 'c-vis-4', kind: 'review', persona: 'p-exec', text: 'The visual system reads as the client\'s register, not the agency\'s showreel.' }
@@ -519,7 +519,11 @@
           artifacts: [
             {
               id: 'af-visual', title: 'Visual system', lane: 'any', pattern: 'pat-visual',
-              outputs: 'Token set, type scale, contrast floor, and the motion policy.',
+              outputs: 'A real token set — colours, type scale, spacing, motion — emitted as CSS custom properties.',
+              /* `makes` names the real output this artifact carries alongside its
+                 prose. The Workbench renders a maker for it and the deliverable
+                 embeds the result. Prose alone was the phase-1 gap. */
+              makes: 'tokens',
               inputs: ['af-audience'], weight: 6, criteria: []
             }
           ]
@@ -535,7 +539,7 @@
           exemplar: ex('../maturity.html', 'Seven pillars charted across three horizons, each with the metric that proves the move'),
           expand: 'Chart patterns belong here with their honesty criteria attached, so a new chart type arrives pre-constrained.',
           criteria: [
-            { id: 'c-viz-1', kind: 'binary', text: 'Every chart states the comparison it is making, in words.', severity: 'high' },
+            { id: 'c-viz-1', kind: 'binary', text: 'Every chart states the comparison it is making, in words.', test: 't-figures-captioned', severity: 'high' },
             { id: 'c-viz-2', kind: 'binary', text: 'No truncated axis without an explicit break marker.' },
             { id: 'c-viz-3', kind: 'evidence', text: 'Every figure in every chart resolves to a registry claim with a source.' },
             { id: 'c-viz-4', kind: 'review', persona: 'p-analyst', text: 'No chart\'s visual encoding overstates the size of the effect.' }
@@ -543,7 +547,8 @@
           artifacts: [
             {
               id: 'af-charts', title: 'Evidence figures', lane: 'any', pattern: 'pat-charts',
-              outputs: 'Each figure: the comparison, the encoding, the source claims, and the caption.',
+              outputs: 'Drawn figures — each one a validated spec rendered to SVG, with its comparison and source claims.',
+              makes: 'visual',
               inputs: ['af-claims', 'af-ontology'], weight: 7, criteria: []
             }
           ]
@@ -561,13 +566,15 @@
           criteria: [
             { id: 'c-mom-1', kind: 'binary', text: 'Nothing essential is reachable only through interaction.', severity: 'high' },
             { id: 'c-mom-2', kind: 'binary', text: 'Every interactive moment degrades to a static state that still communicates.' },
+            { id: 'c-mom-5', kind: 'binary', text: 'The built moment does not overflow horizontally at 390px.', test: 't-responsive' },
             { id: 'c-mom-3', kind: 'binary', text: 'Every interactive moment is keyboard-operable.' },
             { id: 'c-mom-4', kind: 'review', persona: 'p-builder', text: 'The moment is buildable in the time available, or it is cut.' }
           ],
           artifacts: [
             {
               id: 'af-moments', title: 'Interaction plan', lane: 'any', pattern: 'pat-moments',
-              outputs: 'Each moment: the belief it changes, its static fallback, and its keyboard path.',
+              outputs: 'The moment, its static fallback, its keyboard path — and the working code, previewed at real device widths.',
+              makes: 'code',
               inputs: ['af-sectionmap'], weight: 5, criteria: []
             }
           ]

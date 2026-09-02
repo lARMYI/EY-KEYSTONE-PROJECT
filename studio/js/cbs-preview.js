@@ -154,8 +154,13 @@
            preview is not open. Only the mobile width is load-bearing. */
         if (msg.viewport <= 400 && w.CBS_STATE) {
           var cur = w.CBS_STATE.get().responsive || {};
-          cur.at390 = { scrollWidth: msg.scrollWidth, overflow: msg.overflow, overflowBy: msg.overflowBy, at: new Date().toISOString() };
+          var reading = { scrollWidth: msg.scrollWidth, overflow: msg.overflow, overflowBy: msg.overflowBy, at: new Date().toISOString() };
+          cur.at390 = reading;
+          /* Also file it against the artifact, so t-responsive can decide for
+             one artifact rather than for whatever was previewed last. */
+          if (opts.artifactId) cur[opts.artifactId] = reading;
           w.CBS_STATE.set('responsive', cur, { quiet: true });
+          if (opts.artifactId && w.CBS_GATE) w.CBS_GATE.driftCheck(opts.artifactId);
         }
         onMeasure(msg);
         return;
@@ -180,6 +185,10 @@
       node: node,
       show: show,
       setDevice: setDevice,
+      /* Call after unhiding: a frame sized while its container had zero width
+         is scaled against a guess rather than against the column. */
+      refit: function () { fit(); w.setTimeout(function () { send({ type: 'measure' }); }, 120); },
+      device: function () { return deviceId; },
       measure: function () { send({ type: 'measure' }); return lastMeasure; },
       lastMeasure: function () { return lastMeasure; },
       destroy: function () {
@@ -197,10 +206,11 @@
     var a = S.artifact(artifactId);
     var hit = G.findArtifact(artifactId);
     if (!hit || !a.draft) return null;
-    var kind = hit.artifact.visual || hit.artifact.kind;
+    var kind = hit.artifact.makes;
 
     if (kind === 'code' && a.draft.code) {
-      return { type: 'code', html: a.draft.code.html, css: a.draft.code.css, js: a.draft.code.js };
+      var tokenCSS = w.CBS_TOKENS ? w.CBS_TOKENS.toCSS(w.CBS_STATE.get().tokens) + '\n' : '';
+      return { type: 'code', html: a.draft.code.html, css: tokenCSS + (a.draft.code.css || ''), js: a.draft.code.js };
     }
     if (kind === 'scene') {
       var tk = w.CBS_TOKENS.derive(S.get().tokens);

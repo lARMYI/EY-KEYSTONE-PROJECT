@@ -212,6 +212,161 @@
   }
 
   /* --------------------------------------------------------- Tier 3 */
+
+  /* ------------------------------------------- agentic figures and code */
+  /* Both follow the same shape as generate(): Tier 1 composes something real
+     first, the agent is asked to improve on it, and anything the agent returns
+     that does not validate is dropped rather than repaired. The difference is
+     what "validate" means — a figure is a spec cbs-visuals clamps, and code is
+     a string that only ever renders inside the opaque-origin preview frame. */
+
+  var VISUAL_RULES = [
+    'You are proposing FIGURES for one artifact in a client deliverable.',
+    '',
+    'Return ONLY a JSON object: {"figures":[{"kind":"<kind>","title":"...","caption":"...",',
+    '"series":[{"name":"...","points":[{"label":"...","value":0}]}],"nodes":[{"label":"...","note":"..."}],',
+    '"axes":{"x":"...","y":"..."},"zeroBased":true}]}',
+    '',
+    'Rules:',
+    '- "kind" MUST be one of the kinds listed in the brief. Anything else is discarded.',
+    '- Charts take "series"; diagrams and mockups take "nodes". Supply only the one its kind needs.',
+    '- "caption" states, in words, the comparison the reader is being asked to make. It is checked.',
+    '- Never invent a figure. Use only numbers present in the upstream artifacts or the claim',
+    '  registry. If you have none, put [NEEDS EVIDENCE: <what is needed>] in the caption and use',
+    '  zeroes for the values — an honest empty chart beats a plausible invented one.',
+    '- Never set zeroBased to false unless the brief gives you a reason a truncated axis is honest.',
+    '- You are returning DATA, not drawings. Do not return SVG, HTML, or any markup.'
+  ].join('\n');
+
+  var CODE_RULES = [
+    'You are writing one HTML+CSS section for a client deliverable.',
+    '',
+    'Return ONLY a JSON object: {"html":"...","css":"...","js":"..."}',
+    '',
+    'Rules:',
+    '- "html" is the section body only. No <html>, <head>, <body> or <script> tags.',
+    '- Design tokens are already in scope as CSS custom properties. USE THEM rather than',
+    '  hard-coding values: var(--bg) var(--surface) var(--ink) var(--muted) var(--accent)',
+    '  var(--line) var(--radius) var(--space-1..6) var(--text-xs..3xl) var(--font-display)',
+    '  var(--font-ui) var(--font-mono) var(--motion-dur) var(--motion-ease).',
+    '- It MUST NOT overflow horizontally at 390px. Use fluid widths, minmax() grids and',
+    '  wrapping. Fixed pixel widths above 320px are the usual cause of failure, and the',
+    '  studio measures this at 390px rather than taking your word for it.',
+    '- Every interactive element is a real <a> or <button>, so keyboard operation comes from',
+    '  the platform. Nothing essential may depend on script.',
+    '- Wrap any motion in @media (prefers-reduced-motion: no-preference).',
+    '- "js" is optional and may be empty. It is stripped from the exported document.'
+  ].join('\n');
+
+  function visualBrief(artifactId) {
+    var brief = briefFor(artifactId);
+    brief.availableKinds = w.CBS_VISUALS ? w.CBS_VISUALS.KINDS.map(function (k) {
+      var m = w.CBS_VISUALS.META[k] || {};
+      return { kind: k, label: m.label, takes: m.needs };
+    }) : [];
+    brief.claims = S.claimsFor().map(function (c) {
+      return { text: c.text, status: c.status, source: c.source };
+    });
+    return brief;
+  }
+
+  /* Tier 1 figures: one composed spec per artifact, honest placeholders inside. */
+  function composeVisuals(artifactId) {
+    var existing = (S.artifact(artifactId).draft || {}).visuals;
+    if (existing && existing.length) return existing.slice();
+    return [w.CBS_VISUALS.composeSpec('chart.bar', {})];
+  }
+
+  function proposeVisuals(artifactId) {
+    var V = w.CBS_VISUALS;
+    if (!V) return Promise.resolve({ ok: false, error: 'The visual engine is not loaded on this page.' });
+    var base = composeVisuals(artifactId);
+
+    if (!available()) {
+      return Promise.resolve({ ok: true, tier: 1, specs: base, dropped: 0 });
+    }
+
+    var messages = [{
+      role: 'user',
+      content: VISUAL_RULES + '\n\nBRIEF:\n' + JSON.stringify(visualBrief(artifactId), null, 2)
+    }];
+
+    return Promise.resolve()
+      .then(function () { return w.claude.complete({ messages: messages }); })
+      .then(function (reply) {
+        var parsed = extractJSON(typeof reply === 'string' ? reply : (reply && reply.text));
+        var raw = (parsed && Array.isArray(parsed.figures)) ? parsed.figures : [];
+        var dropped = 0;
+        var specs = raw.map(function (f) {
+          if (!f || V.KINDS.indexOf(f.kind) === -1) { dropped++; return null; }
+          var spec = V.validate(f.kind, f);
+          var meta = V.META[f.kind] || {};
+          /* A chart with no points and a diagram with no nodes are not figures. */
+          if (meta.needs === 'series' && !spec.series.length) { dropped++; return null; }
+          if (meta.needs === 'nodes' && !spec.nodes.length) { dropped++; return null; }
+          return spec;
+        }).filter(Boolean).slice(0, 8);
+
+        if (!specs.length) {
+          S.log('info', 'Agent returned no valid figure specs for ' + artifactId + ' — the composed figure stands.', 'agent');
+          return { ok: true, tier: 1, specs: base, dropped: dropped };
+        }
+        S.log('agent', 'Agent proposed ' + specs.length + ' figure(s) for ' + artifactId +
+          (dropped ? '; ' + dropped + ' discarded as invalid' : '') + '.', 'agent');
+        return { ok: true, tier: 2, specs: specs, dropped: dropped };
+      })
+      ['catch'](function (e) {
+        S.log('info', 'Figure call failed (' + (e && e.message) + ') — the composed figure stands.', 'agent');
+        return { ok: true, tier: 1, specs: base, dropped: 0 };
+      });
+  }
+
+  function proposeCode(artifactId) {
+    var M = w.CBS_MAKERS;
+    if (!M) return Promise.resolve({ ok: false, error: 'The maker engine is not loaded on this page.' });
+    var base = M.composeSection(artifactId);
+
+    if (!available()) {
+      return Promise.resolve({ ok: true, tier: 1, code: base });
+    }
+
+    var brief = briefFor(artifactId);
+    brief.composedBaseline = base;
+    var messages = [{ role: 'user', content: CODE_RULES + '\n\nBRIEF:\n' + JSON.stringify(brief, null, 2) }];
+
+    return Promise.resolve()
+      .then(function () { return w.claude.complete({ messages: messages }); })
+      .then(function (reply) {
+        var parsed = extractJSON(typeof reply === 'string' ? reply : (reply && reply.text));
+        var html = parsed && typeof parsed.html === 'string' ? parsed.html : '';
+        if (!html.trim()) {
+          S.log('info', 'Agent returned no usable section for ' + artifactId + ' — the composed section stands.', 'agent');
+          return { ok: true, tier: 1, code: base };
+        }
+        var code = {
+          html: html.slice(0, 60000),
+          css: (parsed && typeof parsed.css === 'string' ? parsed.css : '').slice(0, 40000),
+          js: (parsed && typeof parsed.js === 'string' ? parsed.js : '').slice(0, 20000)
+        };
+        S.log('agent', 'Agent drafted a section for ' + artifactId + '. It renders only inside the sandboxed frame.', 'agent');
+        return { ok: true, tier: 2, code: code };
+      })
+      ['catch'](function (e) {
+        S.log('info', 'Section call failed (' + (e && e.message) + ') — the composed section stands.', 'agent');
+        return { ok: true, tier: 1, code: base };
+      });
+  }
+
+  /* Copy-out packs, so the makers are never dead on a host with no agent. */
+  function visualPack(artifactId) {
+    return VISUAL_RULES + '\n\nBRIEF:\n' + JSON.stringify(visualBrief(artifactId), null, 2);
+  }
+  function codePack(artifactId) {
+    var brief = briefFor(artifactId);
+    brief.composedBaseline = w.CBS_MAKERS ? w.CBS_MAKERS.composeSection(artifactId) : null;
+    return CODE_RULES + '\n\nBRIEF:\n' + JSON.stringify(brief, null, 2);
+  }
+
   function promptPack(artifactId) {
     var brief = briefFor(artifactId);
     return [
@@ -319,6 +474,10 @@
     compose: compose,
     generate: generate,
     promptPack: promptPack,
+    proposeVisuals: proposeVisuals,
+    proposeCode: proposeCode,
+    visualPack: visualPack,
+    codePack: codePack,
     importResponse: importResponse,
     briefFor: briefFor,
     proposeNodes: proposeNodes,

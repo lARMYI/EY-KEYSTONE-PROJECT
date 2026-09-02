@@ -206,7 +206,10 @@
       };
     });
     var failed = results.filter(function (r) { return !r.pass; });
-    return { results: results, failed: failed, pass: failed.length === 0 };
+    /* The tightest pair is the one a reader complains about first, so it is
+       what the Gate and the makers quote rather than an average. */
+    var tightest = results.reduce(function (m2, r) { return r.ratio < m2.ratio ? r : m2; }, results[0]);
+    return { results: results, failed: failed, tightest: tightest, pass: failed.length === 0 };
   }
 
   /* ------------------------------------------------------------ output */

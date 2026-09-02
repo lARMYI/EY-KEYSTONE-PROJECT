@@ -14,55 +14,22 @@
   function setToken(key, value) {
     var m = model(); m[key] = value;
     S.set('tokens', m);
+    if (editor) editor.repaint();
     paintAll();
   }
 
   /* ------------------------------------------------------------ editor */
-  var COLOR_FIELDS = [
-    ['ground', 'Ground'], ['surface', 'Surface'], ['ink', 'Ink'], ['muted', 'Muted'],
-    ['accent', 'Accent'], ['support', 'Support'], ['positive', 'Positive'], ['negative', 'Negative']
-  ];
-
-  function colorField(key, label) {
-    var m = model();
-    var swatch = el('input', { type: 'color', value: m[key], 'aria-label': label + ' colour' });
-    var hex = el('input', { type: 'text', value: m[key], 'aria-label': label + ' hex', spellcheck: 'false' });
-    swatch.addEventListener('input', function () { hex.value = swatch.value; setToken(key, swatch.value); });
-    hex.addEventListener('change', function () {
-      if (!T.hexToRgb(hex.value)) { R.toast('Not a valid hex colour'); hex.value = model()[key]; return; }
-      setToken(key, hex.value);
-    });
-    return el('div.tok-field', null, [
-      el('label', { text: label }),
-      el('div.tok-row', null, [swatch, hex])
-    ]);
-  }
+  /* The editor itself lives in cbs-makers.js, because the Workbench needs the
+     same one. Duplicating it here would let the two drift apart. */
+  var editor = null;
 
   function renderEditor() {
-    var m = model();
-    var ratio = el('select', { 'aria-label': 'Type scale ratio' },
-      Object.keys(T.RATIOS).map(function (k) {
-        return el('option', { value: k, text: k + ' (' + T.RATIOS[k] + ')' });
-      }));
-    ratio.value = m.typeRatio;
-    ratio.addEventListener('change', function () { setToken('typeRatio', ratio.value); });
-
-    var motion = el('select', { 'aria-label': 'Motion policy' },
-      Object.keys(T.MOTION).map(function (k) {
-        return el('option', { value: k, text: k + ' — ' + T.MOTION[k].dur });
-      }));
-    motion.value = m.motion;
-    motion.addEventListener('change', function () { setToken('motion', motion.value); });
-
-    var radius = el('input', { type: 'text', value: String(m.radius), 'aria-label': 'Corner radius in px' });
-    radius.addEventListener('change', function () { setToken('radius', parseInt(radius.value, 10) || 0); });
-
-    mount(R.$('#editor'), el('div.tok-grid', null,
-      COLOR_FIELDS.map(function (f) { return colorField(f[0], f[1]); }).concat([
-        el('div.tok-field', null, [el('label', { text: 'Type ratio' }), ratio]),
-        el('div.tok-field', null, [el('label', { text: 'Motion' }), motion]),
-        el('div.tok-field', null, [el('label', { text: 'Radius (px)' }), radius])
-      ])));
+    if (!editor) {
+      editor = w.CBS_MAKERS.tokenEditor(function () { paintAll(); });
+      mount(R.$('#editor'), editor.node);
+    } else {
+      editor.repaint();
+    }
   }
 
   function renderRamps() {

@@ -58,7 +58,7 @@
           '<h2>' + esc(e.artifact.title) + '</h2>\n' +
           partsOf(e).map(function (p) {
             return '<div class="pt"><h3>' + esc(p.h) + '</h3>\n' + paras(p.body) + '</div>';
-          }).join('\n') +
+          }).join('\n') + madeFor(e) +
           '\n</section>';
       }).join('\n');
     },
@@ -68,7 +68,7 @@
         return '<section class="chapter">\n<h2><span class="num">' + (i + 1) + '.</span> ' + esc(e.artifact.title) + '</h2>\n' +
           partsOf(e).map(function (p, j) {
             return '<h3>' + (i + 1) + '.' + (j + 1) + ' ' + esc(p.h) + '</h3>\n' + paras(p.body);
-          }).join('\n') + '\n</section>';
+          }).join('\n') + madeFor(e) + '\n</section>';
       }).join('\n');
     },
 
@@ -77,7 +77,7 @@
         return '<section class="scroll-sec">\n<h2>' + esc(e.artifact.title) + '</h2>\n' +
           partsOf(e).map(function (p) {
             return '<div class="band"><h3>' + esc(p.h) + '</h3>\n' + paras(p.body) + '</div>';
-          }).join('\n') + '\n</section>';
+          }).join('\n') + madeFor(e) + '\n</section>';
       }).join('\n');
     },
 
@@ -86,7 +86,7 @@
         return '<section class="spec">\n<h2>' + esc(e.artifact.title) + '</h2>\n' +
           '<dl>' + partsOf(e).map(function (p) {
             return '<dt>' + esc(p.h) + '</dt><dd>' + paras(p.body) + '</dd>';
-          }).join('\n') + '</dl>\n</section>';
+          }).join('\n') + '</dl>' + madeFor(e) + '\n</section>';
       }).join('\n');
     },
 
@@ -95,7 +95,7 @@
         return '<section class="phase">\n<h2>' + esc(e.artifact.title) + '</h2>\n' +
           '<table><tbody>' + partsOf(e).map(function (p) {
             return '<tr><th>' + esc(p.h) + '</th><td>' + paras(p.body) + '</td></tr>';
-          }).join('\n') + '</tbody></table>\n</section>';
+          }).join('\n') + '</tbody></table>' + madeFor(e) + '\n</section>';
       }).join('\n');
     },
 
@@ -104,28 +104,33 @@
         return '<section class="module">\n<h2>' + esc(e.artifact.title) + '</h2>\n' +
           '<ol class="agenda">' + partsOf(e).map(function (p) {
             return '<li><b>' + esc(p.h) + '</b>' + paras(p.body) + '</li>';
-          }).join('\n') + '</ol>\n</section>';
+          }).join('\n') + '</ol>' + madeFor(e) + '\n</section>';
       }).join('\n');
     }
   };
 
   /* ----------------------------------------------------------- the shell */
+  /* The palette is no longer frozen here. cbs-tokens emits the real custom
+     properties for this engagement and these aliases map the document's older
+     names onto them, so the deliverable ships in the client's design system
+     rather than in the studio's. */
+  var ALIASES = [
+    ':root{--panel:var(--surface);--mut:var(--muted);--dim:var(--muted);',
+    '--gold:var(--accent);--gold-soft:var(--accent-200);--teal:var(--positive);}'
+  ].join('');
+
   var STYLE = [
-    ':root{--bg:#070A10;--panel:#0F151E;--ink:#F7F3EA;--mut:#94A2B4;--dim:#6E7C94;',
-    '--gold:#E9B84A;--gold-soft:#FBD98C;--line:rgba(255,255,255,.09);--teal:#37D6B2;}',
     '*{margin:0;padding:0;box-sizing:border-box}',
-    'body{background:var(--bg);color:var(--ink);line-height:1.6;',
-    'font-family:"Hanken Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}',
+    'body{background:var(--bg);color:var(--ink);line-height:1.6;font-family:var(--font-ui);}',
     '.wrap{max-width:820px;margin:0 auto;padding:64px 28px 100px}',
-    'h1{font-family:Fraunces,Georgia,serif;font-size:clamp(2rem,5vw,3.2rem);line-height:1.08;',
+    'h1{font-family:var(--font-display);font-size:clamp(2rem,5vw,3.2rem);line-height:1.08;',
     'letter-spacing:-.02em;margin-bottom:16px;font-weight:600}',
-    'h2{font-family:Fraunces,Georgia,serif;font-size:clamp(1.4rem,3vw,2rem);margin:0 0 14px;font-weight:600;letter-spacing:-.01em}',
+    'h2{font-family:var(--font-display);font-size:clamp(1.4rem,3vw,2rem);margin:0 0 14px;font-weight:600;letter-spacing:-.01em}',
     'h3{font-size:1.02rem;margin:20px 0 6px;color:var(--gold-soft);font-weight:700}',
     'p{margin-bottom:12px;color:var(--mut)}',
-    '.eyebrow{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.68rem;letter-spacing:.2em;',
+    '.eyebrow{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.2em;',
     'text-transform:uppercase;color:var(--gold);display:block;margin-bottom:12px}',
-    '.ask{border:1px solid rgba(233,184,74,.28);border-radius:16px;padding:22px;margin:26px 0;',
-    'background:linear-gradient(150deg,rgba(233,184,74,.08),transparent 70%)}',
+    '.ask{border:1px solid var(--accent);border-radius:var(--radius-lg);padding:22px;margin:26px 0;}',
     '.ask p{color:var(--ink);font-size:1.08rem;margin:0}',
     'section{border-top:1px solid var(--line);padding:34px 0;}',
     '.slide{min-height:60vh;display:flex;flex-direction:column;justify-content:center}',
@@ -149,10 +154,109 @@
     'border-radius:12px;padding:16px;margin-top:30px}',
     '.cert b{color:var(--gold-soft)}',
     'footer{border-top:1px solid var(--line);padding-top:24px;margin-top:40px;color:var(--dim);font-size:.8rem}',
-    '@media print{body{background:#fff;color:#111}p,.claims li{color:#333}.slide{page-break-after:always;min-height:0}}'
+    /* figures and built sections */
+    'figure{margin:22px 0}',
+    'figure svg{display:block;width:100%;height:auto;border-radius:var(--radius)}',
+    'figcaption{font-size:.82rem;color:var(--dim);margin-top:8px;font-family:var(--font-mono)}',
+    '.built{border:1px solid var(--line);border-radius:var(--radius-lg);padding:0;overflow:hidden;margin:22px 0}',
+    '.built-note{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;',
+    'color:var(--dim);padding:8px 14px;border-bottom:1px solid var(--line)}',
+    '.built > .built-body{padding:0}',
+    /* Print is the PDF path: no generator, no dependency, and the page breaks
+       are chosen rather than left to the browser. */
+    '@media print{',
+    ':root{--bg:#fff;--surface:#fff;--ink:#111;--muted:#333;--line:rgba(0,0,0,.18)}',
+    'body{background:#fff;color:#111}',
+    'p,.claims li{color:#333}',
+    '.wrap{max-width:none;padding:0}',
+    'section{page-break-inside:avoid;border-top:1px solid #ddd}',
+    '.slide{page-break-after:always;min-height:0}',
+    'h1,h2,h3{page-break-after:avoid}',
+    'figure,.built,table,.ask{page-break-inside:avoid}',
+    '.cert{page-break-before:avoid}',
+    '@page{margin:18mm 16mm}',
+    '}'
   ].join('');
 
+  /* ------------------------------------------------------- made outputs */
+  /* Figures are locally rendered from a validated spec, so the serialized SVG
+     is safe by construction rather than by escaping. */
+  function figuresFor(entry) {
+    var V = w.CBS_VISUALS;
+    var draft = S.artifact(entry.artifact.id).draft;
+    var specs = (draft && draft.visuals) || [];
+    if (!V || !specs.length) return '';
+    return specs.map(function (spec, i) {
+      var svg;
+      try { svg = V.toSVGString(spec.kind, spec); }
+      catch (e) { return ''; }
+      return '<figure>' + svg +
+        '<figcaption>Figure ' + (i + 1) + (spec.title ? ' · ' + esc(spec.title) : '') +
+        (spec.caption ? ' — ' + esc(spec.caption) : '') + '</figcaption></figure>';
+    }).join('\n');
+  }
+
+  /* Authored HTML reaches the export as markup — that is the point of a code
+     artifact. Script does not: a deliverable is a document that gets forwarded,
+     not an application, and the studio's sandboxed preview is where behaviour
+     belongs. What was removed is stated in the certification record rather than
+     dropped quietly. */
+  var stripped = 0;
+
+  function sanitiseCode(html) {
+    var before = html;
+    var out = String(html || '')
+      .replace(/<script\b[\s\S]*?<\/script\s*>/gi, '')
+      .replace(/<script\b[^>]*>/gi, '')
+      .replace(/\son[a-z]+\s*=\s*"[^"]*"/gi, '')
+      .replace(/\son[a-z]+\s*=\s*'[^']*'/gi, '')
+      .replace(/\son[a-z]+\s*=\s*[^\s>]+/gi, '')
+      .replace(/javascript:/gi, '');
+    if (out !== before) stripped++;
+    return out;
+  }
+
+  function builtFor(entry) {
+    var draft = S.artifact(entry.artifact.id).draft;
+    var code = draft && draft.code;
+    if (!code || !String(code.html || '').trim()) return '';
+    var scoped = 's-' + entry.artifact.id.replace(/[^a-z0-9]/gi, '');
+    var css = String(code.css || '').replace(/(^|\})\s*([^{}@]+)\{/g, function (m0, brace, sel) {
+      /* Scope the section's own rules so a built section cannot restyle the
+         document around it. @-rules are left alone and their bodies scope on
+         the next pass through this same expression. */
+      var parts = sel.split(',').map(function (x) {
+        var t = x.trim();
+        if (!t || t.charAt(0) === '@' || t.charAt(0) === '%' || /^\d/.test(t)) return t;
+        if (/^(body|html|:root)$/i.test(t)) return '#' + scoped;
+        return '#' + scoped + ' ' + t;
+      });
+      return brace + parts.join(',') + '{';
+    });
+    if (code.js) stripped++;
+    return '<div class="built"><div class="built-note">Built section · ' + esc(entry.artifact.title) + '</div>' +
+      '<style>' + css + '</style>' +
+      '<div class="built-body" id="' + scoped + '">' + sanitiseCode(code.html) + '</div></div>';
+  }
+
+  /* Whatever this artifact made, in document order under its prose. */
+  function madeFor(entry) {
+    return figuresFor(entry) + builtFor(entry);
+  }
+
+  /* Counts what the certified artifacts actually made, for the record block. */
+  function madeCounts() {
+    var figures = 0, sections = 0;
+    certified().forEach(function (e) {
+      var draft = S.artifact(e.artifact.id).draft || {};
+      figures += (draft.visuals || []).length;
+      if (draft.code && String(draft.code.html || '').trim()) sections++;
+    });
+    return { figures: figures, sections: sections };
+  }
+
   function deliverable() {
+    stripped = 0;                       /* per-export, not per-session */
     var i = S.get().intake || {};
     var laneId = S.lane();
     var lane = w.CBS_LANE_BY_ID[laneId];
@@ -173,12 +277,18 @@
         }).join('\n') + '</ul></section>'
       : '';
 
+    var made = madeCounts();
     var cert = '<div class="cert"><b>Certification record</b><br>' +
       items.length + ' artifact(s) certified · ' +
+      (made.figures ? made.figures + ' figure(s) drawn · ' : '') +
+      (made.sections ? made.sections + ' built section(s) · ' : '') +
       claims.length + ' claim(s) sourced or labelled · ' +
       (unsourced.length ? unsourced.length + ' unsourced claim(s) excluded · ' : '') +
       'engagement fingerprint <b>' + esc(engagementFingerprint()) + '</b><br>' +
       'Fingerprints are FNV-1a content hashes for drift detection, not cryptographic digests.' +
+      (stripped ? '<br>Script was removed from ' + stripped + ' built section(s): this is a document, ' +
+        'so its HTML and CSS ship and its behaviour does not. The studio preview is where the ' +
+        'interactive version runs.' : '') +
       (left.length ? '<br>' + left.length + ' in-scope artifact(s) were not certified and are absent from this document: ' +
         esc(left.map(function (e) { return e.artifact.title; }).join(', ')) + '.' : '') +
       '</div>';
@@ -188,7 +298,9 @@
       '<meta charset="UTF-8">',
       '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
       '<title>' + esc(i.client || 'Client deliverable') + '</title>',
-      '<style>' + STYLE + '</style>',
+      /* The engagement's own tokens first, then the document's aliases onto
+         them, then the document's own rules. */
+      '<style>' + tokenCSS() + '\n' + ALIASES + STYLE + '</style>',
       '</head>', '<body>', '<main class="wrap">',
       '<header>',
       '<span class="eyebrow">' + esc((lane && lane.title) || 'Deliverable') + '</span>',
@@ -204,6 +316,15 @@
       '</footer>',
       '</main>', '</body>', '</html>'
     ].join('\n');
+  }
+
+  function tokenCSS() {
+    var T = w.CBS_TOKENS;
+    return T ? T.toCSS(S.get().tokens) : ':root{--bg:#070A10;--surface:#0F151E;--ink:#F7F3EA;' +
+      '--muted:#94A2B4;--accent:#E9B84A;--accent-200:#FBD98C;--positive:#37D6B2;' +
+      '--line:rgba(255,255,255,.09);--radius:14px;--radius-lg:20px;' +
+      '--font-display:Fraunces,Georgia,serif;--font-ui:"Hanken Grotesk",system-ui,sans-serif;' +
+      '--font-mono:ui-monospace,SFMono-Regular,Menlo,monospace;}';
   }
 
   function engagementFingerprint() {

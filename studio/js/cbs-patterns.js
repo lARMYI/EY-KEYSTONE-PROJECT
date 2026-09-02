@@ -179,15 +179,15 @@
 
     P('pat-visual', 'Visual system', 'any',
       'Tokens defined once, referenced everywhere.', [
-        { h: 'Tokens', hint: 'Colour, type, spacing, radius, shadow.', fill: '[NEEDS DECISION: the token set]' },
-        { h: 'Type scale', hint: 'Display, UI, mono.', fill: '[NEEDS DECISION: the type scale]' },
+        { h: 'Tokens', hint: 'Colour, type, spacing, radius, motion. The maker below writes this part from the live token set.', fill: '[NEEDS DECISION: the token set — open the maker and adopt or edit the tokens]' },
+        { h: 'Type scale', hint: 'Display, UI, mono. Written from the chosen ratio.', fill: '[NEEDS DECISION: the type scale]' },
         { h: 'Contrast floor', hint: 'At least 4.5:1 for body text.', fill: 'Body text holds at least 4.5:1 against its ground.' },
         { h: 'Motion policy', hint: 'Decorative only; reduced-motion honoured.', fill: 'Motion is decorative. Nothing is understandable only through animation. prefers-reduced-motion collapses to instant states.' }
       ]),
 
     P('pat-charts', 'Evidence figures', 'any',
       'Each figure: comparison, encoding, source claims, caption.', [
-        { h: 'The comparison', hint: 'State in words what the reader should compare.', fill: '[NEEDS DECISION: the comparison each figure makes]' },
+        { h: 'The comparison', hint: 'State in words what the reader should compare. The maker writes one line per figure.', fill: '[NEEDS DECISION: the comparison each figure makes — add a figure in the maker]' },
         { h: 'Encoding', hint: 'Chart form, axis, and whether it starts at zero.', fill: '[NEEDS DECISION: encoding and axis treatment]' },
         { h: 'Source claims', hint: 'Every figure resolves to a registry claim.', fill: '[REGISTRY: figures resolve to claim ids]' },
         { h: 'Caption', hint: 'The figure should read without it, but write it anyway.', fill: '[NEEDS DECISION: captions]' }
@@ -264,7 +264,13 @@
   ];
 
   /* ------------------------------------------------- lane artifact patterns */
-  function LP(id, title, lane, purpose, parts) { return P(id, title, lane, purpose, parts); }
+  /* `makes` names a real output the artifact carries beyond its prose parts:
+     'tokens' a design system, 'visual' a set of drawn figures, 'code' an HTML+CSS
+     section previewed at real device widths. attachLaneArtifacts copies it onto
+     the artifact so the Workbench knows which maker to open. */
+  function LP(id, title, lane, purpose, parts, makes) {
+    return P(id, title, lane, purpose, parts, makes ? { makes: makes } : null);
+  }
 
   var LANE_PATTERNS = [
     /* deck */
@@ -284,7 +290,7 @@
     LP('lp-deck-evidence', 'Evidence slide', 'deck', 'The figure that carries the argument.', [
       { h: 'The comparison', hint: 'What the reader should compare.', fill: '[NEEDS DECISION: the comparison]' },
       { h: 'Source', hint: 'Registry claim id and as-of date.', fill: '[REGISTRY: claim id]' }
-    ]),
+    ], 'visual'),
     LP('lp-deck-options', 'Options slide', 'deck', 'Real options with real trade-offs, not one option and two decoys.', [
       { h: 'Options', hint: 'Three, each genuinely viable.', fill: '[NEEDS DECISION: three viable options]' },
       { h: 'Trade-offs', hint: 'What each costs and forecloses.', fill: '[NEEDS DECISION: trade-off per option]' }
@@ -312,7 +318,7 @@
       { h: 'What is established', hint: 'Facts, sourced.', fill: '[REGISTRY: verified claims]' },
       { h: 'What we infer', hint: 'Inferences, labelled.', fill: '[NEEDS DECISION: inferences, labelled as such]' },
       { h: 'Key assumptions', hint: 'Surfaced, with falsifiers.', fill: '[NEEDS DECISION: assumptions and falsifiers]' }
-    ]),
+    ], 'visual'),
     LP('lp-paper-options', 'Options analysis', 'paper', 'Options with criteria applied consistently.', [
       { h: 'Options', hint: 'Genuinely viable alternatives.', fill: '[NEEDS DECISION: the options]' },
       { h: 'Evaluation criteria', hint: 'Applied identically to each.', fill: '[NEEDS DECISION: evaluation criteria]' }
@@ -331,7 +337,7 @@
       { h: 'Headline', hint: 'The decision, not a slogan.', fill: '{{decision}}' },
       { h: 'Sub', hint: 'Who it is for and what happens next.', fill: 'For {{decider}}. {{stakes}}' },
       { h: 'Primary action', hint: 'One. Where it goes.', fill: '[NEEDS DECISION: the primary action]' }
-    ]),
+    ], 'code'),
     LP('lp-exp-thesis', 'Thesis section', 'experience', 'The falsifiable claim, early.', [
       { h: 'The claim', hint: 'Arguable.', fill: '[NEEDS DECISION: the thesis]' },
       { h: 'What would prove it', hint: 'Inside the timeframe.', fill: '[NEEDS DECISION: proof condition]' }
@@ -347,7 +353,7 @@
     LP('lp-exp-interactive', 'Interactive moment', 'experience', 'The one mechanism the reader operates themselves.', [
       { h: 'The moment', hint: 'What they do.', fill: '[NEEDS DECISION: the interaction]' },
       { h: 'Fallback', hint: 'The static state.', fill: '[NEEDS DECISION: static fallback]' }
-    ]),
+    ], 'code'),
     LP('lp-exp-decision', 'Decision section', 'experience', 'The ask again, as checkable gates.', [
       { h: 'The gates', hint: 'Yes/no, checkable.', fill: '[NEEDS DECISION: the checkable gates]' },
       { h: 'The ask', hint: 'Restated.', fill: '{{decision}}' }
@@ -364,7 +370,7 @@
     LP('lp-app-flow', 'Core flow', 'application', 'The demo path, which is the real path.', [
       { h: 'Steps', hint: 'Screen by screen.', fill: '[NEEDS DECISION: the core flow]' },
       { h: 'What is real', hint: 'And what is stubbed. State it plainly.', fill: '[NEEDS DECISION: real vs stubbed]' }
-    ]),
+    ], 'visual'),
     LP('lp-app-states', 'State design', 'application', 'Empty, loading, error, permission-denied.', [
       { h: 'States', hint: 'All four, designed.', fill: '[NEEDS DECISION: the four states]' }
     ]),
@@ -375,7 +381,7 @@
     LP('lp-app-demo', 'Demo script', 'application', 'The five minutes that has to work.', [
       { h: 'Script', hint: 'Exact steps.', fill: '[NEEDS DECISION: the demo script]' },
       { h: 'Failure recovery', hint: 'What you say when it breaks.', fill: '[NEEDS DECISION: recovery line]' }
-    ]),
+    ], 'code'),
 
     /* program */
     LP('lp-prog-horizons', 'Horizons', 'program', 'Today, mid, long — with what changes between.', [
@@ -384,7 +390,7 @@
     LP('lp-prog-phases', 'Phases', 'program', 'Each phase with a theme and an exit.', [
       { h: 'Phases', hint: 'Theme, duration, exit condition.', fill: '[NEEDS DECISION: the phases]' },
       { h: 'Gating', hint: 'What each phase waits on.', fill: '[NEEDS DECISION: capability gating]' }
-    ]),
+    ], 'visual'),
     LP('lp-prog-measures', 'Measures', 'program', 'A yes/no per phase that decides continuation.', [
       { h: 'Measures', hint: 'Binary, per phase.', fill: '[NEEDS DECISION: the measure per phase]' }
     ]),
@@ -453,6 +459,7 @@
           lane: lane.id,
           pattern: pid,
           outputs: p.purpose,
+          makes: p.makes,
           appliesWhen: { lane: lane.id },
           weight: 9 - Math.min(i, 4),
           inputs: i === 0 ? ['af-sectionmap'] : ['af-' + lane.artifacts[i - 1]],
