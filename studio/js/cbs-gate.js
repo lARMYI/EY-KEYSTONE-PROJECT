@@ -110,12 +110,39 @@
       return bad.length ? F(bad.length + ' published artifact(s) have no passport.') : P('Everything published carries a passport.');
     },
 
+    /* Contrast used to be undecidable. With a real token set it is arithmetic:
+       WCAG 2.1 relative luminance over every pair that matters. */
+    't-contrast-floor': function () {
+      if (!w.CBS_TOKENS) return U('The token engine is not loaded on this page.');
+      var a = w.CBS_TOKENS.audit(S.get().tokens);
+      if (a.pass) {
+        var lowest = a.results.reduce(function (m, r) { return r.ratio < m.ratio ? r : m; }, a.results[0]);
+        return P('All ' + a.results.length + ' pairs clear their floor; tightest is ' +
+                 lowest.id + ' at ' + lowest.ratio.toFixed(2) + ':1.');
+      }
+      var f = a.failed[0];
+      return F(a.failed.length + ' pair(s) below the floor — ' + f.id + ' is ' +
+               f.ratio.toFixed(2) + ':1 against a floor of ' + f.floor +
+               (f.suggestion ? '. ' + f.suggestion + ' would clear it.' : '.'));
+    },
+
+    /* Responsive is measured inside the sandboxed preview at 390px, not asserted.
+       Honest when it has not been run: the studio does not pass a test it never
+       performed. */
+    't-responsive': function () {
+      var m = S.get().responsive;
+      if (!m || !m.at390) {
+        return U('Not measured yet — open the preview at Mobile 390 and the frame reports its own overflow.');
+      }
+      var r = m.at390;
+      return r.overflow
+        ? F('Overflows by ' + r.overflowBy + 'px at 390 (content is ' + r.scrollWidth + 'px wide).')
+        : P('No horizontal overflow at 390 (content ' + r.scrollWidth + 'px).');
+    },
+
     /* Deliberately undecidable in the browser — these fall back to a human. */
     't-figures-reconcile': function () {
       return U('Reconciliation cannot be checked automatically — confirm the figures agree across every appearance.');
-    },
-    't-contrast-floor': function () {
-      return U('Contrast has to be measured against the rendered deliverable — check body text against its ground.');
     },
     't-roundtrip': function () {
       return U('Export, reset, and re-import to confirm the state returns. The studio cannot vouch for this on your behalf.');

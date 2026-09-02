@@ -52,6 +52,7 @@
   var NAV = [
     { href: 'index.html', label: 'The playbook' },
     { href: 'build.html', label: 'Build' },
+    { href: 'design.html', label: 'Design' },
     { href: 'library.html', label: 'Library' },
     { href: 'publish.html', label: 'Publish' },
     { href: '../index.html', label: 'Worked example' }

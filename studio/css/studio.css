@@ -461,3 +461,84 @@
   text-align: left; font-family: var(--ui); font-size: inherit;
   letter-spacing: normal; text-transform: none; color: inherit;
 }
+
+/* ==================================================== phase 2: design */
+/* Token editor */
+.studio-body .tok-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+.studio-body .tok-field { display: flex; flex-direction: column; gap: 6px; }
+.studio-body .tok-field label {
+  font-family: var(--mono); font-size: .62rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--dim);
+}
+.studio-body .tok-row { display: flex; gap: 8px; align-items: center; }
+.studio-body .tok-row input[type="color"] {
+  width: 40px; height: 34px; padding: 0; border: 1px solid var(--line-2);
+  border-radius: 8px; background: transparent; cursor: pointer;
+}
+.studio-body .tok-row input[type="text"], .studio-body .tok-field select {
+  flex: 1; min-width: 0; background: var(--panel2); border: 1px solid var(--line-2);
+  border-radius: 8px; color: var(--ink); font-family: var(--mono);
+  font-size: .78rem; padding: 8px 10px;
+}
+.studio-body .tok-row input:focus, .studio-body .tok-field select:focus {
+  outline: none; border-color: var(--gold);
+}
+.studio-body .ramp { display: flex; border-radius: 8px; overflow: hidden; height: 30px; }
+.studio-body .ramp span { flex: 1 }
+.studio-body .swatch-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.studio-body .swatch {
+  width: 74px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line);
+  font-family: var(--mono); font-size: .56rem;
+}
+.studio-body .swatch i { display: block; height: 44px }
+.studio-body .swatch b { display: block; padding: 5px 6px; color: var(--dim); font-weight: 400; word-break: break-all; }
+
+/* contrast report */
+.studio-body .cx-row {
+  display: grid; grid-template-columns: 52px 1fr auto; gap: 12px; align-items: center;
+  padding: 9px 0; border-top: 1px solid var(--line); font-size: .84rem;
+}
+.studio-body .cx-chip {
+  height: 34px; border-radius: 7px; display: flex; align-items: center;
+  justify-content: center; font-size: .72rem; font-weight: 700; border: 1px solid var(--line);
+}
+.studio-body .cx-ratio { font-family: var(--mono); font-size: .8rem }
+.studio-body .cx-pass { color: var(--teal) }
+.studio-body .cx-fail { color: var(--red) }
+.studio-body .cx-fix {
+  font-family: var(--mono); font-size: .64rem; color: var(--gold-soft);
+  border: 1px solid var(--line-warm); border-radius: 20px; padding: 3px 9px;
+  background: transparent; cursor: pointer;
+}
+.studio-body .cx-fix:hover { background: rgba(233,184,74,.12) }
+
+/* visual gallery */
+.studio-body .vz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.studio-body .vz-card {
+  border: 1px solid var(--line); border-radius: var(--r); background: var(--panel);
+  padding: 12px; display: flex; flex-direction: column; gap: 8px;
+}
+.studio-body .vz-card > svg { border-radius: 8px }
+.studio-body .vz-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px }
+.studio-body .vz-head b { font-size: .88rem }
+
+/* live preview */
+.studio-body .pv-wrap { display: flex; flex-direction: column }
+.studio-body .pv-tabs { display: flex; gap: 6px; flex-wrap: wrap }
+.studio-body .pv-status { display: flex; gap: 6px; flex-wrap: wrap; align-items: center }
+.studio-body .pv-stage {
+  border: 1px solid var(--line-2); border-radius: var(--r); overflow: hidden;
+  position: relative; display: flex; justify-content: center;
+  /* the surround is deliberately not the page ground, so it reads as "outside
+     the device" rather than as part of the previewed page */
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.014) 0 8px, transparent 8px 16px),
+    var(--bg2);
+}
+.studio-body .pv-scaler { transform-origin: top center; flex: 0 0 auto }
+.studio-body .pv-frame { border: 0; display: block; background: #0B0F16 }
+
+@media (max-width: 700px) {
+  .studio-body .tok-grid { grid-template-columns: 1fr }
+  .studio-body .vz-grid { grid-template-columns: 1fr }
+}

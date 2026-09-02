@@ -48,7 +48,8 @@
         { id: 'c-lane-exp-1', kind: 'binary', text: 'The ask is above the fold on first paint.', severity: 'high' },
         { id: 'c-lane-exp-2', kind: 'binary', text: 'Every enhancement has a working fallback — no blank states.', severity: 'high' },
         { id: 'c-lane-exp-3', kind: 'binary', text: 'Deep links carry a return path back to the reader\'s position.' },
-        { id: 'c-lane-exp-4', kind: 'binary', text: 'The whole thing is operable by keyboard.' }
+        { id: 'c-lane-exp-4', kind: 'binary', text: 'The whole thing is operable by keyboard.' },
+        { id: 'c-lane-exp-5', kind: 'binary', text: 'No horizontal overflow at 390px.', test: 't-responsive', severity: 'high' }
       ],
       adapter: 'adapt-experience'
     },
