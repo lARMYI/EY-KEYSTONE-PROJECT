@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data:; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'">
+<title>Client Build Studio — the playbook</title>
+<meta name="description" content="A self-organizing playbook for building anything for a client: sections, areas and artifacts, held to explicit criteria, drafted with agentic AI, certified at a Gate, and published.">
+<meta name="theme-color" content="#070A10">
+<link rel="stylesheet" href="../css/fonts.css">
+<link rel="stylesheet" href="../css/keystone.css">
+<link rel="stylesheet" href="css/studio.css">
+</head>
+<body class="studio-body">
+
+<main class="wrap">
+
+  <header class="s-hero reveal">
+    <span class="eyebrow">Client Build Studio</span>
+    <h1>Build anything for a client — <em>framed, grounded, certified, published.</em></h1>
+    <p class="lede">
+      A method, expressed as an application. It organizes the work into sections, areas and
+      artifacts; holds every artifact to criteria written before the draft existed; drafts with
+      agentic AI that never leaves you with nothing; and refuses to publish anything it has not
+      certified. Everything on this page is rendered from a single data spine — including the
+      part that lets the app add to itself.
+    </p>
+    <div class="herobtns">
+      <a href="build.html" class="btn">Start a commission</a>
+      <a href="library.html" class="btn ghost">Browse the library</a>
+      <a href="../index.html" class="btn ghost">See the worked example</a>
+    </div>
+  </header>
+
+  <section class="s-block reveal" aria-labelledby="h-ladder">
+    <h2 class="s-h2" id="h-ladder">Where an engagement gets to</h2>
+    <p class="s-sub">
+      Readiness is derived, never asserted. It rolls up from what is actually drafted and
+      certified in the current engagement, so the ladder moves only when the work does.
+    </p>
+    <div id="ladder"></div>
+    <p class="small dimmed" id="ladder-note"></p>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-method">
+    <h2 class="s-h2" id="h-method">The method</h2>
+    <p class="s-sub">
+      Eight sections. Each holds areas; each area answers named questions, owns criteria, and
+      produces artifacts. Every area links to the place in the worked example where that move is
+      visible in something that shipped.
+    </p>
+    <div id="sections"></div>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-criteria">
+    <h2 class="s-h2" id="h-criteria">How criteria work</h2>
+    <p class="s-sub">Three kinds, and one rule the Gate enforces mechanically.</p>
+    <div class="grid-3" id="criteria-kinds"></div>
+    <div class="integrity" style="margin-top:20px">
+      <h4>The Gate rule</h4>
+      <p class="muted small">
+        An artifact certifies only when every binary criterion passes, zero claims are Unsourced,
+        and every assigned persona review is resolved. High-severity criteria cannot be waived.
+        Certification mints a passport carrying the criteria results, the claim statuses and an
+        evidence hash.
+      </p>
+    </div>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-lanes">
+    <h2 class="s-h2" id="h-lanes">The six lanes</h2>
+    <p class="s-sub">
+      Sections, areas and criteria are media-neutral. A lane supplies three things and only three:
+      what good means in that medium, the criteria that medium imposes, and an adapter that
+      assembles certified artifacts into something openable.
+    </p>
+    <div class="grid-3" id="lanes"></div>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-personas">
+    <h2 class="s-h2" id="h-personas">The red team</h2>
+    <p class="s-sub">
+      Six readers, each a lens with a named failure it hunts for. Personas are data — adding one
+      makes it assignable to review criteria everywhere at once.
+    </p>
+    <div class="grid-3" id="personas"></div>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-expand">
+    <h2 class="s-h2" id="h-expand">How this grows</h2>
+    <p class="s-sub">
+      Three write paths into the spine, all human-accepted, none automatic. Accepted nodes land in
+      a local overlay — the shipped spine file is never written by the browser.
+    </p>
+    <div class="grid-3">
+      <div class="card warm">
+        <span class="card-icon">◇</span>
+        <h4>Node proposal</h4>
+        <p>The agent reads the diagnosis and proposes a schema-conforming area or artifact. You accept, edit, or reject it. Accepting renders it immediately.</p>
+      </div>
+      <div class="card warm">
+        <span class="card-icon">◈</span>
+        <h4>Draft generation</h4>
+        <p>Three tiers: a deterministic composer that always works, a live agent when the host provides one, and a copy-out prompt pack for anywhere else.</p>
+      </div>
+      <div class="card warm">
+        <span class="card-icon">◆</span>
+        <h4>Pattern promotion</h4>
+        <p>An artifact that worked becomes a library pattern, criteria attached, client material stripped. This is what makes the playbook compound.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-integrity">
+    <h2 class="s-h2" id="h-integrity">Spine integrity</h2>
+    <p class="s-sub">
+      The validator runs at load on every page. A malformed spine is reported here rather than
+      failing silently — duplicate ids, unknown criterion kinds, dependency cycles, criteria naming
+      tests that were never registered, and areas with nothing that can fail.
+    </p>
+    <div id="integrity"></div>
+  </section>
+
+  <footer class="s-block reveal" style="padding-bottom:70px">
+    <p class="small dimmed" id="foot-note"></p>
+  </footer>
+
+</main>
+
+<script src="js/cbs-schema.js"></script>
+<script src="js/cbs-spine.js"></script>
+<script src="js/cbs-lanes.js"></script>
+<script src="js/cbs-patterns.js"></script>
+<script src="js/cbs-state.js"></script>
+<script src="js/cbs-graph.js"></script>
+<script src="js/cbs-render.js"></script>
+<script src="js/cbs-gate.js"></script>
+<script src="js/cbs-console.js"></script>
+<script src="js/cbs-page-playbook.js"></script>
+</body>
+</html>
