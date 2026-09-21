@@ -673,6 +673,7 @@ Reply ONLY a JSON object (no prose, no fences):\n{"challenge":"the single toughe
     input.value=''; add('user',q); history.push({role:'user',content:q});
     busy=true; sendBtn.disabled=true; input.placeholder='\u2026';
     const sec=openSection, title=KB[sec]?KB[sec].title:'Keystone';
+    if(window.keystoneAccess&&window.keystoneAccess.logChat){ window.keystoneAccess.logChat(q,sec); }
     if(!window.claude||!window.claude.complete){
       add('bot','The live agent isn\u2019t reachable right now \u2014 see the \u201c'+title+'\u201d section above.','err');
       busy=false; sendBtn.disabled=false; input.placeholder='Ask, or push back\u2026'; return;
