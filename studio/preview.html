@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--
+  The sandboxed preview host.
+
+  This page is framed by the studio with sandbox="allow-scripts" and WITHOUT
+  allow-same-origin, so it runs on an opaque origin: it cannot read the
+  studio's localStorage, cannot touch the studio's DOM, and cannot be read by
+  it. That containment is what makes it safe to execute authored code here.
+
+  Two consequences follow, and both are deliberate:
+
+  1. This page carries its OWN Content-Security-Policy. A document fetched over
+     http has its own policy rather than inheriting the embedder's, which is
+     precisely why previewing executable code needs no change to the studio's
+     `default-src 'self'`.
+  2. The runtime below is INLINE. On an opaque origin the `'self'` keyword
+     matches nothing, so an external <script src> could not load at all. Inline
+     is the only option here, and it is safe because the sandbox — not the CSP —
+     is the boundary doing the work.
+
+  connect-src is 'none': a preview can never phone home.
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Preview</title>
+<style>
+  *{ margin:0; padding:0; box-sizing:border-box }
+  html,body { height:100% }
+  body { background:#0B0F16; color:#F7F3EA; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; line-height:1.55; overflow-x:hidden }
+  #stage { min-height:100% }
+  .pv-empty { display:flex; align-items:center; justify-content:center; height:100vh; color:#6E7C94; font-size:.82rem; text-align:center; padding:24px }
+  .pv-err { margin:16px; padding:14px 16px; border:1px solid rgba(255,107,107,.4); border-radius:10px; background:rgba(255,107,107,.07); color:#FF9B9B; font:12px/1.6 ui-monospace,monospace; white-space:pre-wrap; word-break:break-word }
+
+  /* deck */
+  .pv-deck { height:100vh; display:flex; flex-direction:column }
+  .pv-slide { flex:1; display:flex; flex-direction:column; justify-content:center; padding:8vmin }
+  .pv-slide h2 { font-size:clamp(1.4rem,4.4vw,2.6rem); margin-bottom:.5em; line-height:1.1 }
+  .pv-slide h3 { font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; color:#E9B84A; margin:1.2em 0 .3em; font-family:ui-monospace,monospace }
+  .pv-slide p { color:#94A2B4; max-width:60ch; margin-bottom:.6em }
+  .pv-bar { display:flex; align-items:center; gap:12px; padding:10px 16px; border-top:1px solid rgba(255,255,255,.08); font:11px/1 ui-monospace,monospace; color:#6E7C94 }
+  .pv-bar button { background:transparent; border:1px solid rgba(255,255,255,.16); color:#94A2B4; border-radius:6px; padding:5px 10px; cursor:pointer; font:inherit }
+  .pv-bar button:hover { border-color:#E9B84A; color:#FBD98C }
+  .pv-dots { display:flex; gap:5px; margin-left:auto }
+  .pv-dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.2) }
+  .pv-dot.on { background:#E9B84A }
+
+  /* stream */
+  .pv-stream { padding:8vmin; font-size:clamp(1rem,2.4vw,1.35rem); max-width:70ch }
+  .pv-caret { display:inline-block; width:.6ch; background:#E9B84A; animation:pvblink 1s step-end infinite }
+  @keyframes pvblink { 50%{opacity:0} }
+
+  /* scene */
+  #scene { width:100%; height:100vh; display:block }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pv-caret { animation:none }
+    *, *::before, *::after { animation-duration:.001s !important; transition-duration:.001s !important }
+  }
+</style>
+</head>
+<body>
+<div id="stage"><div class="pv-empty">Nothing to preview yet.</div></div>
+
+<script>
+(function () {
+  'use strict';
+  var stage = document.getElementById('stage');
+  var parentWin = window.parent;
+  var current = null;
+
+  function post(msg) { try { parentWin.postMessage(JSON.stringify(msg), '*'); } catch (e) {} }
+  function clear() { while (stage.firstChild) stage.removeChild(stage.firstChild); }
+  function fail(where, e) {
+    var p = document.createElement('pre');
+    p.className = 'pv-err';
+    p.textContent = where + ': ' + (e && (e.message || e) || 'unknown error');
+    stage.appendChild(p);
+    post({ type: 'error', where: where, message: String(e && (e.message || e)) });
+  }
+
+  /* Report layout back so the studio can run a real responsive test rather
+     than asserting the deliverable is responsive without measuring it. */
+  function measure() {
+    var doc = document.documentElement;
+    post({
+      type: 'measure',
+      viewport: window.innerWidth,
+      scrollWidth: doc.scrollWidth,
+      scrollHeight: doc.scrollHeight,
+      overflow: doc.scrollWidth > window.innerWidth + 1,
+      overflowBy: Math.max(0, doc.scrollWidth - window.innerWidth)
+    });
+  }
+
+  /* ------------------------------------------------------------ code */
+  /* Authored HTML/CSS/JS. This is the one path that runs arbitrary markup,
+     and it is exactly why the frame is sandboxed onto an opaque origin. */
+  function renderCode(p) {
+    clear();
+    if (p.css) {
+      var st = document.createElement('style');
+      st.textContent = String(p.css);
+      stage.appendChild(st);
+    }
+    var host = document.createElement('div');
+    host.innerHTML = String(p.html || '');
+    stage.appendChild(host);
+    if (p.js) {
+      try {
+        var s = document.createElement('script');
+        s.textContent = String(p.js);
+        stage.appendChild(s);
+      } catch (e) { fail('script', e); }
+    }
+  }
+
+  /* ------------------------------------------------------------ deck */
+  function renderDeck(p) {
+    clear();
+    var slides = Array.isArray(p.slides) ? p.slides : [];
+    if (!slides.length) { stage.innerHTML = '<div class="pv-empty">No slides.</div>'; return; }
+    var i = 0;
+    var wrap = document.createElement('div'); wrap.className = 'pv-deck';
+    var body = document.createElement('div'); body.className = 'pv-slide';
+    var bar = document.createElement('div'); bar.className = 'pv-bar';
+    var prev = document.createElement('button'); prev.textContent = '←'; prev.setAttribute('aria-label', 'Previous slide');
+    var next = document.createElement('button'); next.textContent = '→'; next.setAttribute('aria-label', 'Next slide');
+    var count = document.createElement('span');
+    var dots = document.createElement('div'); dots.className = 'pv-dots';
+    bar.appendChild(prev); bar.appendChild(next); bar.appendChild(count); bar.appendChild(dots);
+    wrap.appendChild(body); wrap.appendChild(bar); stage.appendChild(wrap);
+
+    function draw() {
+      while (body.firstChild) body.removeChild(body.firstChild);
+      var s = slides[i] || {};
+      var h = document.createElement('h2'); h.textContent = s.title || ''; body.appendChild(h);
+      (Array.isArray(s.parts) ? s.parts : []).forEach(function (part) {
+        if (part.h) { var k = document.createElement('h3'); k.textContent = part.h; body.appendChild(k); }
+        String(part.body || '').split(/\n{2,}/).forEach(function (para) {
+          if (!para.trim()) return;
+          var el = document.createElement('p'); el.textContent = para.trim(); body.appendChild(el);
+        });
+      });
+      count.textContent = (i + 1) + ' / ' + slides.length;
+      while (dots.firstChild) dots.removeChild(dots.firstChild);
+      slides.forEach(function (_, n) {
+        var dd = document.createElement('span');
+        dd.className = 'pv-dot' + (n === i ? ' on' : '');
+        dots.appendChild(dd);
+      });
+      measure();
+    }
+    function go(n) { i = Math.max(0, Math.min(slides.length - 1, n)); draw(); }
+    prev.onclick = function () { go(i - 1); };
+    next.onclick = function () { go(i + 1); };
+    document.onkeydown = function (e) {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(i + 1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(i - 1); }
+    };
+    draw();
+  }
+
+  /* ---------------------------------------------------------- stream */
+  /* Streaming text — the reveal an agent-written passage gets when it lands. */
+  function renderStream(p) {
+    clear();
+    var box = document.createElement('div'); box.className = 'pv-stream';
+    var span = document.createElement('span');
+    var caret = document.createElement('span'); caret.className = 'pv-caret'; caret.textContent = ' ';
+    box.appendChild(span); box.appendChild(caret); stage.appendChild(box);
+    var text = String(p.text || ''), n = 0;
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) { span.textContent = text; caret.remove(); measure(); return; }
+    var speed = Math.max(6, Math.min(60, p.speed || 18));
+    (function tick() {
+      n += 2;
+      span.textContent = text.slice(0, n);
+      if (n < text.length) setTimeout(tick, 1000 / speed);
+      else { caret.remove(); measure(); }
+    })();
+  }
+
+  /* ----------------------------------------------------------- scene */
+  /* 3D via the three.js the repo already vendors. The parent fetches the
+     library and posts its source, because on an opaque origin a <script src>
+     to /vendor/ could not resolve. */
+  var threeLoaded = false;
+  function ensureThree(src) {
+    if (threeLoaded || !src) return threeLoaded;
+    var s = document.createElement('script');
+    s.textContent = src;
+    document.head.appendChild(s);
+    threeLoaded = !!window.THREE;
+    return threeLoaded;
+  }
+
+  function renderScene(p) {
+    clear();
+    if (!ensureThree(p.lib)) {
+      stage.innerHTML = '<div class="pv-empty">3D is unavailable — the three.js build could not be loaded. Everything else still previews.</div>';
+      return;
+    }
+    var THREE = window.THREE;
+    var canvas = document.createElement('canvas'); canvas.id = 'scene';
+    stage.appendChild(canvas);
+    var renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    } catch (e) {
+      stage.innerHTML = '<div class="pv-empty">WebGL is not available in this browser. The scene degrades to nothing rather than to a broken canvas.</div>';
+      return;
+    }
+    var scene = new THREE.Scene();
+    var cam = new THREE.PerspectiveCamera(45, 1, .1, 100);
+    cam.position.set(0, 0, 5);
+
+    var accent = new THREE.Color(p.accent || '#E9B84A');
+    scene.add(new THREE.AmbientLight(0xffffff, .55));
+    var key = new THREE.DirectionalLight(accent, 1.1); key.position.set(3, 4, 5); scene.add(key);
+
+    var group = new THREE.Group();
+    var shape = p.shape || 'keystone';
+    var geo;
+    if (shape === 'box') geo = new THREE.BoxGeometry(1.4, 1.4, 1.4);
+    else if (shape === 'sphere') geo = new THREE.SphereGeometry(1, 32, 24);
+    else if (shape === 'torus') geo = new THREE.TorusGeometry(1, .36, 20, 60);
+    else geo = new THREE.CylinderGeometry(.75, 1.15, 1.5, 4);   /* keystone wedge */
+    var mat = new THREE.MeshStandardMaterial({ color: accent, metalness: .65, roughness: .28, flatShading: shape === 'keystone' });
+    group.add(new THREE.Mesh(geo, mat));
+
+    var n = Math.max(0, Math.min(24, p.satellites || 0));
+    for (var i = 0; i < n; i++) {
+      var a = (i / n) * Math.PI * 2;
+      var m = new THREE.Mesh(new THREE.IcosahedronGeometry(.11, 0),
+        new THREE.MeshStandardMaterial({ color: 0x5B97FF, metalness: .4, roughness: .5 }));
+      m.position.set(Math.cos(a) * 2.2, Math.sin(a * 2) * .5, Math.sin(a) * 2.2);
+      group.add(m);
+    }
+    scene.add(group);
+
+    function size() {
+      var wpx = stage.clientWidth || window.innerWidth;
+      var hpx = window.innerHeight;
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      renderer.setSize(wpx, hpx, false);
+      cam.aspect = wpx / hpx; cam.updateProjectionMatrix();
+    }
+    size();
+    window.addEventListener('resize', size);
+
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var raf;
+    function loop(t) {
+      if (!reduced) { group.rotation.y = t * 0.0004; group.rotation.x = Math.sin(t * 0.0002) * .18; }
+      renderer.render(scene, cam);
+      raf = requestAnimationFrame(loop);
+    }
+    if (reduced) { group.rotation.y = .6; renderer.render(scene, cam); }
+    else raf = requestAnimationFrame(loop);
+    current = function () { if (raf) cancelAnimationFrame(raf); window.removeEventListener('resize', size); };
+    measure();
+  }
+
+  /* --------------------------------------------------------- dispatch */
+  var RENDER = { code: renderCode, deck: renderDeck, stream: renderStream, scene: renderScene };
+
+  window.addEventListener('message', function (e) {
+    var msg;
+    try { msg = JSON.parse(e.data); } catch (err) { return; }
+    if (!msg || typeof msg.type !== 'string') return;
+    if (current) { try { current(); } catch (x) {} current = null; }
+    if (msg.type === 'measure') { measure(); return; }
+    var fn = RENDER[msg.type];
+    if (!fn) { clear(); stage.innerHTML = '<div class="pv-empty">Unknown preview type.</div>'; return; }
+    try { fn(msg); } catch (err) { fail(msg.type, err); }
+    setTimeout(measure, 60);
+  });
+
+  window.addEventListener('resize', function () { setTimeout(measure, 40); });
+  window.addEventListener('error', function (e) { post({ type: 'error', where: 'runtime', message: String(e.message) }); });
+
+  post({ type: 'ready' });
+})();
+</script>
+</body>
+</html>

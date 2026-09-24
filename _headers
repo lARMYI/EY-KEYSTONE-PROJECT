@@ -4,7 +4,9 @@
 # in every HTML page, so the CSP applies on every host either way.
 #
 # Keep this CSP in sync with the <meta http-equiv="Content-Security-Policy">
-# tags in index.html / roadmap.html / maturity.html / quarters.html.
+# tags in index.html / roadmap.html / maturity.html / quarters.html and in
+# studio/index.html / studio/build.html / studio/library.html /
+# studio/publish.html. All eight carry the identical policy.
 /*
   Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data:; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'
   X-Content-Type-Options: nosniff

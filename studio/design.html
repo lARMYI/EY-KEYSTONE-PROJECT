@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data:; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'">
+<title>Client Build Studio — design</title>
+<meta name="description" content="A real design token set with measured contrast, generated SVG graphics, and a live preview at real device widths.">
+<meta name="theme-color" content="#070A10">
+<link rel="stylesheet" href="../css/fonts.css">
+<link rel="stylesheet" href="../css/keystone.css">
+<link rel="stylesheet" href="css/studio.css">
+</head>
+<body class="studio-body">
+
+<main class="wrap">
+
+  <header class="s-hero reveal">
+    <span class="eyebrow">Design</span>
+    <h1>Tokens you can <em>use</em>, graphics that <em>draw</em>, code you can <em>see.</em></h1>
+    <p class="lede">
+      The three things the studio used to only describe. The token set emits real CSS custom
+      properties and its contrast is measured, not asserted. Every graphic is generated from a
+      validated spec — never model-authored markup. And the preview runs the actual code at
+      real device widths, sandboxed onto an opaque origin so it cannot reach this page.
+    </p>
+  </header>
+
+  <section class="s-block reveal" aria-labelledby="h-editor">
+    <h2 class="s-h2" id="h-editor">The token set</h2>
+    <p class="s-sub">Change anything here and every graphic, the preview and the exported CSS follow it.</p>
+    <div id="editor"></div>
+    <div id="ramps" style="margin-top:26px"></div>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-contrast">
+    <h2 class="s-h2" id="h-contrast">Contrast, measured</h2>
+    <div id="contrast"></div>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-preview">
+    <h2 class="s-h2" id="h-preview">Live preview</h2>
+    <p class="s-sub">
+      Real HTML and CSS, real JavaScript, rendered at 390 / 768 / 1440. The overflow readout is
+      measured inside the frame at that width — which is how "works on mobile" stops being a claim.
+    </p>
+    <div id="preview"></div>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-gallery">
+    <h2 class="s-h2" id="h-gallery">Generated graphics</h2>
+    <p class="s-sub">
+      Every one is drawn from a validated spec object. The agent proposes the spec; the renderer
+      draws it locally. Nothing the model writes is ever injected as markup.
+    </p>
+    <div id="gallery"></div>
+  </section>
+
+  <section class="s-block reveal" aria-labelledby="h-css">
+    <h2 class="s-h2" id="h-css">tokens.css</h2>
+    <div id="cssout"></div>
+  </section>
+
+  <div style="height:60px"></div>
+</main>
+
+<script src="js/cbs-schema.js"></script>
+<script src="js/cbs-spine.js"></script>
+<script src="js/cbs-lanes.js"></script>
+<script src="js/cbs-patterns.js"></script>
+<script src="js/cbs-state.js"></script>
+<script src="js/cbs-graph.js"></script>
+<script src="js/cbs-render.js"></script>
+<script src="js/cbs-gate.js"></script>
+<script src="js/cbs-tokens.js"></script>
+<script src="js/cbs-visuals.js"></script>
+<script src="js/cbs-preview.js"></script>
+<script src="js/cbs-makers.js"></script>
+<script src="js/cbs-console.js"></script>
+<script src="js/cbs-page-design.js"></script>
+</body>
+</html>
