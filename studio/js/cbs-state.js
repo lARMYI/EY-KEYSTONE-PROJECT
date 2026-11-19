@@ -75,6 +75,26 @@
     if (!Array.isArray(e.overlay.artifacts)) e.overlay.artifacts = [];
     if (!Array.isArray(e.log)) e.log = [];
     if (!Array.isArray(e.promoted)) e.promoted = [];
+
+    /* The keyed collections must be plain objects. An array here is a quiet
+       disaster rather than a loud one: writing claims onto an array sets named
+       properties, which JSON.stringify discards, so every claim vanishes on the
+       next save with nothing in the log to say why. Coerce instead, keeping the
+       entries, because a hand-edited export listing claims as an array is a
+       reasonable thing for a person to have written. */
+    ['artifacts', 'criteria', 'claims', 'reviews'].forEach(function (key) {
+      var v = e[key];
+      if (v && typeof v === 'object' && !Array.isArray(v)) return;
+      var out = {};
+      if (Array.isArray(v)) {
+        v.forEach(function (item, i) {
+          if (!item || typeof item !== 'object') return;
+          out[item.id || (key.slice(0, 2) + '-' + (i + 1))] = item;
+        });
+      }
+      e[key] = out;
+    });
+
     e.stateVersion = STATE_VERSION;
     return e;
   }

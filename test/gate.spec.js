@@ -181,3 +181,30 @@ test('an engagement round-trips through export and import', async ({ page }) => 
   expect(r.afterLevel).toBe(r.beforeLevel);
   expect(r.client).toContain('tier-one retail bank');
 });
+
+test('a keyed collection stored as an array survives the round-trip', async ({ page }) => {
+  /* Writing claims onto an array sets named properties, and JSON.stringify
+     drops those — so an engagement whose claims arrived as an array used to
+     lose every one of them on the next save, silently. normalise() coerces. */
+  await page.evaluate(() => {
+    const raw = JSON.parse(localStorage.getItem('cbs.engagement.v1'));
+    raw.claims = [{ id: 'cl-legacy', text: 'Written as an array.', status: 'verified', source: 'A prior export' }];
+    localStorage.setItem('cbs.engagement.v1', JSON.stringify(raw));
+  });
+  await page.goto('/studio/build.html', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(300);
+
+  const first = await page.evaluate(() => {
+    CBS_STATE.addClaim({ text: 'Added afterwards.', status: 'proposed', artifactId: 'af-context' });
+    return CBS_STATE.claimsFor().map(c => c.text);
+  });
+  expect(first).toContain('Written as an array.');
+  expect(first).toContain('Added afterwards.');
+
+  await page.goto('/studio/library.html', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(300);
+  const after = await page.evaluate(() => CBS_STATE.claimsFor().map(c => c.text));
+  expect(after, 'both claims survive a navigation').toEqual(expect.arrayContaining([
+    'Written as an array.', 'Added afterwards.'
+  ]));
+});

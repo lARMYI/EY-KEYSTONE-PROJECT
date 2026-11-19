@@ -14,7 +14,9 @@
     { id: 'memory', label: 'engagement.json', file: 'engagement.json', mime: 'application/json',
       note: 'The portable memory: commission, artifacts, claims, criteria results, passports, overlay and run log. Re-import it to resume or fork this engagement.' },
     { id: 'buildorder', label: 'BUILD-ORDER.md', file: 'BUILD-ORDER.md', mime: 'text/markdown',
-      note: 'The agent prompt pack: dependency-ordered build list, design tokens, the criteria as acceptance tests, the claim registry, and a prompt per artifact.' }
+      note: 'The agent prompt pack: dependency-ordered build list, design tokens, the criteria as acceptance tests, the claim registry, and a prompt per artifact.' },
+    { id: 'pdf', label: 'deliverable.pdf', file: 'deliverable.pdf', mime: 'application/pdf', binary: true,
+      note: 'A real PDF, written here rather than printed. Figures stay vector — the same validated specs, translated to path operators. Set in Helvetica, because PDF embeds static font programs and this engagement\'s faces are variable web fonts; built sections are named rather than laid out, since that needs a CSS engine.' }
   ];
 
   var current = 'deliverable';
@@ -25,9 +27,67 @@
     return P.deliverable();
   }
 
+  /* A PDF is bytes, so it gets a download link and a described preview rather
+     than a textarea and a clipboard button. */
+  function renderPDFExport(host, tab, tabStrip) {
+    var bytes, err = null;
+    try { bytes = P.pdfBytes(); }
+    catch (e) { err = e; bytes = null; }
+
+    var dl = null;
+    if (bytes && w.URL && w.URL.createObjectURL && ('download' in d.createElement('a'))) {
+      var url = w.URL.createObjectURL(w.CBS_PDF.toBlob(bytes));
+      dl = el('a.btn', { href: url, download: tab.file, text: 'Download ' + tab.file });
+      dl.addEventListener('click', function () {
+        w.setTimeout(function () { w.URL.revokeObjectURL(url); }, 4000);
+      });
+    }
+
+    var doc = null;
+    try { doc = bytes ? P.pdfDoc() : null; } catch (e) { /* already reported */ }
+
+    mount(host, [
+      tabStrip,
+      el('p.small.muted', { style: 'margin-bottom:12px', text: tab.note }),
+      err
+        ? el('div.integrity.bad', null, [
+            el('h4', { text: 'The PDF could not be written' }),
+            el('p.small.muted', { text: String(err && err.message) })
+          ])
+        : el('div.inline', { style: 'margin-bottom:12px' }, [
+            dl,
+            el('span.small.dimmed', {
+              text: (bytes.length / 1024).toFixed(1) + ' KB' +
+                (doc ? ' · ' + doc.pageCount + ' page' + (doc.pageCount === 1 ? '' : 's') : '')
+            }),
+            dl ? null : el('span.small', {
+              style: 'color:var(--gold)',
+              text: 'This browser cannot download generated files. Open the studio over http rather than from the filesystem.'
+            })
+          ]),
+      el('p.small.dimmed', {
+        text: 'The print stylesheet on the HTML deliverable is still there and still useful: ' +
+              'printing that keeps the real typography and renders the built sections. ' +
+              'This file is for attaching to an email.'
+      })
+    ]);
+  }
+
   function renderExports() {
     var host = R.$('#exports');
     var tab = TABS.filter(function (t) { return t.id === current; })[0];
+
+    var tabStrip = el('div.export-tabs', { role: 'tablist' }, TABS.map(function (t) {
+      return el('button.etab', {
+        type: 'button', role: 'tab',
+        'aria-selected': t.id === current ? 'true' : 'false',
+        text: t.label,
+        onclick: function () { current = t.id; renderExports(); }
+      });
+    }));
+
+    if (tab.binary) { renderPDFExport(host, tab, tabStrip); return; }
+
     var text = content(current);
 
     var box = el('textarea.export-box', { readonly: true, 'aria-label': tab.label, spellcheck: 'false' });
@@ -36,14 +96,7 @@
     var dl = R.downloadable(tab.file, text, tab.mime);
 
     mount(host, [
-      el('div.export-tabs', { role: 'tablist' }, TABS.map(function (t) {
-        return el('button.etab', {
-          type: 'button', role: 'tab',
-          'aria-selected': t.id === current ? 'true' : 'false',
-          text: t.label,
-          onclick: function () { current = t.id; renderExports(); }
-        });
-      })),
+      tabStrip,
       el('p.small.muted', { style: 'margin-bottom:12px', text: tab.note }),
       el('div.inline', { style: 'margin-bottom:12px' }, [
         el('button.btn', { type: 'button', text: 'Copy ' + tab.file, onclick: function () { R.copyText(text, tab.file + ' copied'); } }),

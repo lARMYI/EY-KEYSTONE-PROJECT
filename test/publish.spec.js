@@ -74,6 +74,14 @@ test('the deliverable carries tokens, vector figures and a scoped built section'
   expect((html.match(/--[a-z0-9-]+:/g) || []).length, 'real token CSS').toBeGreaterThanOrEqual(40);
   expect((html.match(/<svg/g) || []).length, 'figures inlined').toBe(2);
   expect((html.match(/<figcaption/g) || []).length).toBe(2);
+  /* The renderer draws the caption inside the SVG, so the figcaption carries
+     the number and title only — printing it twice is the bug this catches. */
+  const captions = html.match(/<figcaption>[^<]*<\/figcaption>/g) || [];
+  expect(captions.length).toBe(2);
+  for (const c of captions) {
+    expect(c, 'the figcaption repeats the drawn caption').not.toContain('per quarter');
+    expect(c).toMatch(/Figure \d/);
+  }
   expect((html.match(/class="built"/g) || []).length, 'built section embedded').toBe(1);
 
   /* Script never ships, and the record says so rather than dropping it quietly. */

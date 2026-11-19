@@ -190,9 +190,11 @@
       var svg;
       try { svg = V.toSVGString(spec.kind, spec); }
       catch (e) { return ''; }
+      /* The caption is drawn inside the SVG by the renderer, so repeating it
+         here would print it twice under every figure. */
       return '<figure>' + svg +
         '<figcaption>Figure ' + (i + 1) + (spec.title ? ' · ' + esc(spec.title) : '') +
-        (spec.caption ? ' — ' + esc(spec.caption) : '') + '</figcaption></figure>';
+        '</figcaption></figure>';
     }).join('\n');
   }
 
@@ -325,6 +327,198 @@
       '--line:rgba(255,255,255,.09);--radius:14px;--radius-lg:20px;' +
       '--font-display:Fraunces,Georgia,serif;--font-ui:"Hanken Grotesk",system-ui,sans-serif;' +
       '--font-mono:ui-monospace,SFMono-Regular,Menlo,monospace;}';
+  }
+
+  /* ------------------------------------------------------------- the PDF */
+  /* A real PDF, not a print stylesheet. Figures stay vector because
+     cbs-svg2pdf translates the same SVG nodes the HTML deliverable inlines.
+
+     Two honest limits, both stated in the document itself:
+       - Base-14 fonts only. The site's faces are variable woff2, which PDF
+         cannot embed without instancing them first, so this is Helvetica.
+       - Built (code) sections cannot be laid out without a CSS engine. Each
+         one is named with a pointer to the HTML deliverable rather than
+         dropped silently or shown as a box of markup. */
+
+  var PDF_INK = '#111111', PDF_MUTED = '#4A4A4A', PDF_DIM = '#767676', PDF_RULE = '#D8D8D8';
+
+  function accentForPrint() {
+    var T = w.CBS_TOKENS;
+    if (!T) return '#8A6A12';
+    var model = T.derive(S.get().tokens);
+    /* The screen accent is tuned for a dark ground. On white it has to clear
+       the same 4.5:1 floor the studio holds itself to, so darken until it does
+       rather than printing an illegible gold. */
+    var fixed = T.fixContrast(model.model.accent, '#FFFFFF', 4.5);
+    return fixed || model.model.accent;
+  }
+
+  function pdfDoc() {
+    var PDF = w.CBS_PDF;
+    if (!PDF) return null;
+    var doc = PDF.doc({ width: PDF.A4.width, height: PDF.A4.height, margin: 54 });
+    var i = S.get().intake || {};
+    var lane = w.CBS_LANE_BY_ID[S.lane()];
+    var items = certified();
+    var left = omitted();
+    var accent = accentForPrint();
+    var W = doc.contentWidth;
+    var M = doc.margin;
+
+    function rule(gap) {
+      doc.y += (gap || 10);
+      doc.line(M, doc.y, M + W, doc.y, { stroke: PDF_RULE, lineWidth: 0.6 });
+      doc.y += (gap || 10);
+    }
+    function heading(text, size, font, color) {
+      doc.need(size * 2.2);
+      doc.y += size * 0.9;
+      doc.text(text, M, doc.y, { size: size, font: font || 'bold', color: color || PDF_INK });
+      doc.y += size * 0.5;
+    }
+    function eyebrow(text) {
+      doc.need(16);
+      doc.y += 9;
+      doc.text(String(text).toUpperCase(), M, doc.y,
+        { size: 7.5, font: 'mono', color: accent, charSpace: 1.4 });
+      doc.y += 5;
+    }
+    function body(text, opts) {
+      opts = opts || {};
+      doc.paragraph(text, {
+        size: opts.size || 9.6, leading: opts.leading || 14.2,
+        color: opts.color || PDF_MUTED, x: opts.x || M,
+        width: opts.width || W, after: opts.after === undefined ? 7 : opts.after
+      });
+    }
+
+    /* --- cover ------------------------------------------------------- */
+    doc.y = 150;
+    doc.text(((lane && lane.title) || 'Deliverable').toUpperCase(), M, doc.y,
+      { size: 8, font: 'mono', color: accent, charSpace: 1.6 });
+    doc.y += 26;
+    doc.wrap(i.client || 'Untitled engagement', W, { size: 26, font: 'bold' })
+      .forEach(function (ln) { doc.text(ln, M, doc.y, { size: 26, font: 'bold', color: PDF_INK }); doc.y += 31; });
+
+    doc.y += 14;
+    doc.rect(M, doc.y, W, 2, { fill: accent });
+    doc.y += 20;
+
+    if (i.decision) {
+      doc.wrap(i.decision, W, { size: 13, font: 'body' }).forEach(function (ln) {
+        doc.text(ln, M, doc.y, { size: 13, color: PDF_INK }); doc.y += 19;
+      });
+    }
+    doc.y += 12;
+    if (i.decider) { eyebrow('Decision needed from'); body(i.decider, { color: PDF_INK }); }
+    if (i.stakes) { eyebrow('The cost of no'); body(i.stakes); }
+    if (i.trigger) { eyebrow('What changed'); body(i.trigger); }
+
+    /* --- the artifacts ----------------------------------------------- */
+    items.forEach(function (e, n) {
+      doc.addPage();
+      eyebrow(e.section.title + ' / ' + e.area.title);
+      heading(e.artifact.title, 17);
+      rule(8);
+
+      partsOf(e).forEach(function (part) {
+        doc.need(40);
+        doc.y += 6;
+        doc.text(part.h, M, doc.y + 9, { size: 8.6, font: 'bold', color: accent });
+        doc.y += 15;
+        body(part.body, { after: 9 });
+      });
+
+      /* Figures, as vector. */
+      var draft = S.artifact(e.artifact.id).draft || {};
+      (draft.visuals || []).forEach(function (spec, fi) {
+        var V = w.CBS_VISUALS, T = w.CBS_SVG2PDF;
+        if (!V || !T) return;
+        var node;
+        try { node = V.render(spec.kind, spec); } catch (err) { return; }
+        var vb = (node.getAttribute('viewBox') || '').split(/[\s,]+/).map(parseFloat);
+        var ratio = (vb.length === 4 && vb[2]) ? vb[3] / vb[2] : 0.56;
+        var h = W * ratio;
+        if (doc.y + h + 40 > doc.height - M) doc.addPage();
+        doc.y += 10;
+        try { doc.y += T.draw(doc, node, M, doc.y, W, { background: '#FFFFFF' }); }
+        catch (err) {
+          /* A translator that cannot draw says so in the document rather than
+             leaving a gap the reader would never question. */
+          doc.text('[figure could not be rendered: ' + err.message + ']', M, doc.y + 10,
+            { size: 8, font: 'mono', color: '#B00020' });
+          doc.y += 18;
+        }
+        doc.y += 10;
+        /* The renderer draws the caption inside the figure; only the number
+           and title belong out here. */
+        doc.text('Figure ' + (fi + 1) + (spec.title ? ' \u00b7 ' + spec.title : ''), M, doc.y,
+          { size: 7.6, font: 'mono', color: PDF_DIM });
+        doc.y += 16;
+      });
+
+      /* Built sections: named, not laid out. */
+      if (draft.code && String(draft.code.html || '').trim()) {
+        doc.need(64);
+        doc.y += 8;
+        doc.rect(M, doc.y, W, 44, { stroke: PDF_RULE, lineWidth: 0.6 });
+        doc.text('BUILT SECTION', M + 12, doc.y + 16, { size: 7.5, font: 'mono', color: accent, charSpace: 1.2 });
+        doc.text('Interactive; it lives in the HTML deliverable, not in print.',
+          M + 12, doc.y + 31, { size: 8.6, color: PDF_MUTED });
+        doc.y += 56;
+      }
+    });
+
+    /* --- claims & sources -------------------------------------------- */
+    var claims = S.claimsFor().filter(function (c) { return c.status !== 'unsourced'; });
+    var unsourced = S.claimsFor().filter(function (c) { return c.status === 'unsourced'; });
+    if (claims.length) {
+      doc.addPage();
+      eyebrow('Evidence');
+      heading('Claims and sources', 17);
+      rule(8);
+      claims.forEach(function (c) {
+        doc.need(34);
+        doc.y += 4;
+        doc.text(String(c.status).toUpperCase(), M, doc.y + 9, { size: 7, font: 'mono', color: accent, charSpace: 1 });
+        doc.y += 13;
+        body(c.text, { size: 9.2, leading: 13, after: 2 });
+        if (c.source) body(c.source + (c.asOf ? ' - as of ' + c.asOf : ''), { size: 8, leading: 11.5, color: PDF_DIM, after: 8 });
+        else doc.y += 6;
+      });
+    }
+
+    /* --- the record --------------------------------------------------- */
+    doc.need(170);
+    rule(14);
+    eyebrow('Certification record');
+    var made = madeCounts();
+    var record = [
+      items.length + ' artifact(s) certified.',
+      made.figures ? made.figures + ' figure(s) drawn as vector graphics from validated specs.' : null,
+      made.sections ? made.sections + ' built section(s) are interactive and appear only in the HTML deliverable.' : null,
+      claims.length + ' claim(s) sourced or labelled.' +
+        (unsourced.length ? ' ' + unsourced.length + ' unsourced claim(s) were excluded.' : ''),
+      'Engagement fingerprint ' + engagementFingerprint() + '. This is an FNV-1a content hash for ' +
+        'detecting drift after certification, not a cryptographic digest.',
+      left.length ? left.length + ' in-scope artifact(s) are absent because they carry no passport: ' +
+        left.map(function (e) { return e.artifact.title; }).join(', ') + '.' : null,
+      'Set in Helvetica: PDF embeds static font programs, and this engagement’s faces are variable ' +
+        'web fonts. The HTML deliverable carries the real typography.'
+    ].filter(Boolean);
+    record.forEach(function (line) { body(line, { size: 8.4, leading: 12, color: PDF_DIM, after: 5 }); });
+
+    return doc;
+  }
+
+  function pdfBytes() {
+    var doc = pdfDoc();
+    return doc ? doc.bytes() : null;
+  }
+
+  function pdfBlob() {
+    var bytes = pdfBytes();
+    return bytes ? w.CBS_PDF.toBlob(bytes) : null;
   }
 
   function engagementFingerprint() {
@@ -529,6 +723,9 @@
     buildOrder: buildOrder,
     engagementFingerprint: engagementFingerprint,
     markPublished: markPublished,
+    pdfDoc: pdfDoc,
+    pdfBytes: pdfBytes,
+    pdfBlob: pdfBlob,
     topo: topo,
     ADAPTERS: ADAPTERS
   };

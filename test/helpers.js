@@ -34,7 +34,9 @@ function blankEngagement(overrides) {
   return Object.assign({
     version: 1,
     intake: Object.assign({}, COMMISSION),
-    artifacts: {}, criteria: {}, claims: [], reviews: {},
+    /* Keyed objects, matching cbs-state's own blank(). An array here used to
+       make claims vanish on the first navigation. */
+    artifacts: {}, criteria: {}, claims: {}, reviews: {},
     overlay: { areas: [], artifacts: [] },
     promoted: [], log: [], tokens: null, responsive: {}
   }, overrides || {});

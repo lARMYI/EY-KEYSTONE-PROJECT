@@ -90,8 +90,9 @@ studio/publish.html    assembly, the three exports, and the expansion loop
 studio/preview.html    the sandboxed render host (its own CSP; opaque origin)
 studio/css/studio.css  studio components, every rule scoped under .studio-body
 studio/js/cbs-*.js     schema, spine, lanes, patterns, state, graph, render,
-                       gate, agent, tokens, visuals, preview, makers, publish,
-                       console, page controllers
+                       gate, agent, tokens, visuals, preview, makers, pdf,
+                       svg2pdf, publish, console, page controllers
+test/                  the browser suite (dev only; nothing here ships)
 ```
 
 ### The spine
@@ -211,11 +212,37 @@ path under this site's CSP; the download button is a feature-detected enhancemen
 
 The deliverable ships in the engagement's own token set, inlines its figures, and
 carries built sections with their CSS scoped to the section so they cannot restyle
-the document around them. **PDF is print-to-PDF**: a real print stylesheet with
-chosen page breaks and `@page` margins, no generator and no dependency — not a
-generated PDF binary. Script is removed from built sections on export, and the
+the document around them. Script is removed from built sections on export, and the
 certification record says so rather than dropping it quietly: a deliverable is a
 document that gets forwarded, and the studio preview is where behaviour belongs.
+
+### The PDF
+
+`deliverable.pdf` is written, not printed. `cbs-pdf.js` is a small PDF 1.4 writer
+— objects, xref, content streams, base-14 fonts, exact wrapping from embedded AFM
+width tables — and `cbs-svg2pdf.js` walks the SVG the figure renderers already
+produce and emits path operators, so **charts stay vector in the file**.
+
+Vendoring a PDF library would have meant ~350KB of third-party code in a repo
+whose audit story is the product, and it would still have rasterized the figures.
+Translating the SVG instead means every current and future figure type works in
+PDF with no extra renderer. The translator **throws on any element it does not
+know**, and the suite runs all thirteen kinds through it, so a renderer reaching
+for something new fails the build rather than leaving a blank area in a document
+a client reads.
+
+Two limits, printed in the document itself rather than left for the reader to
+discover:
+
+- **Helvetica.** PDF embeds static font programs; this site's faces are variable
+  woff2, which would need instancing first. The HTML deliverable carries the real
+  typography.
+- **Built sections are named, not laid out.** Rendering HTML and CSS needs a CSS
+  engine. Each one appears as a labelled box pointing at the HTML deliverable.
+
+The print stylesheet stays, and is still the better path when you want the real
+typography and the built sections rendered: print the HTML. The generated file is
+for attaching to an email.
 
 ### Verification
 
@@ -228,7 +255,7 @@ ships; the site itself stays dependency-free.
 cd test && npm ci && npx playwright test
 ```
 
-Fifty checks across nine pages and seven areas. A red build means one of:
+Fifty-seven checks across nine pages and eight areas. A red build means one of:
 
 | Area | What fails the build |
 | --- | --- |
@@ -239,6 +266,7 @@ Fifty checks across nine pages and seven areas. A red build means one of:
 | `visuals` | a renderer drawing nothing, a hostile spec being honoured rather than clamped, or a chart encoding that misstates its data |
 | `preview` | the frame becoming readable from the parent, or the responsive check passing without measuring |
 | `publish` | an uncertified artifact reaching the deliverable, script surviving the export, or a built section escaping its CSS scope |
+| `pdf` | the file failing to parse, a figure arriving as a raster image, the translator skipping an element instead of refusing it, or wrapping that overflows its measure |
 
 The suite is checked against itself: six deliberate regressions — an external
 image, an unregistered test name, `allow-same-origin` on the preview frame, a
@@ -264,10 +292,12 @@ function rather than a string to evaluate. Every node is built with `createEleme
 `textContent` — there is no `innerHTML` path for engagement text, agent output, or an
 imported file.
 
-**Honest limits.** PDF is print-to-PDF, not a generated binary. The 3D path is a scene
-renderer over parametric primitives, not a modelling tool or a mesh importer. "Live AI
-interactive" means the studio calls the agent and posts new specs into the frame — the
-frame has `connect-src 'none'` and can never call out itself.
+**Honest limits.** The generated PDF is set in Helvetica and names its built sections
+rather than laying them out; print the HTML deliverable when you want the real
+typography. The 3D path is a scene renderer over parametric primitives, not a
+modelling tool or a mesh importer. "Live AI interactive" means the studio calls the
+agent and posts new specs into the frame — the frame has `connect-src 'none'` and can
+never call out itself.
 
 ## The briefing agent and its LLM
 
