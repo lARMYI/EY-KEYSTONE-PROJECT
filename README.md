@@ -217,6 +217,41 @@ generated PDF binary. Script is removed from built sections on export, and the
 certification record says so rather than dropping it quietly: a deliverable is a
 document that gets forwarded, and the studio preview is where behaviour belongs.
 
+### Verification
+
+`test/` holds a Playwright suite that runs the site the way a contributor does
+— `python3 -m http.server` from the repo root — and `.github/workflows/verify.yml`
+runs it on every push and on pull requests into `main`. Nothing under `test/`
+ships; the site itself stays dependency-free.
+
+```bash
+cd test && npm ci && npx playwright test
+```
+
+Fifty checks across nine pages and seven areas. A red build means one of:
+
+| Area | What fails the build |
+| --- | --- |
+| `pages` | a console error, a CSP violation, an external request, horizontal overflow at 390px, or a section that never reveals |
+| `csp` | `_headers` and any page `<meta>` disagreeing, an inline `<script>`, or an `eval` in studio JS |
+| `spine` | the spine failing validation, a criterion naming an unregistered test, a test that throws or returns an unearned `pass`, or the board deadlocking |
+| `tiers` | a garbled, empty or throwing agent producing anything less than a real Tier 1 draft |
+| `visuals` | a renderer drawing nothing, a hostile spec being honoured rather than clamped, or a chart encoding that misstates its data |
+| `preview` | the frame becoming readable from the parent, or the responsive check passing without measuring |
+| `publish` | an uncertified artifact reaching the deliverable, script surviving the export, or a built section escaping its CSS scope |
+
+The suite is checked against itself: six deliberate regressions — an external
+image, an unregistered test name, `allow-same-origin` on the preview frame, a
+drifted CSP, disabled script-stripping and a 1200px-wide wrapper — each fail
+the specific test that should catch them.
+
+The page list is asserted against the filesystem, so a page added to the repo
+but not to the sweep fails the build rather than going unchecked.
+
+On a machine whose network blocks Playwright's browser CDN, point the suite at
+an existing Chromium with `PLAYWRIGHT_CHROMIUM_EXECUTABLE`. CI needs no such
+variable.
+
 ### Running and constraints
 
 Served by the same static host — `python3 -m http.server 8000`, then

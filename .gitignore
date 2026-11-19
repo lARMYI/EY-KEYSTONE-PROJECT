@@ -1,0 +1,4 @@
+# Test tooling only — nothing under test/ ships with the site.
+test/node_modules/
+test/playwright-report/
+test/test-results/
